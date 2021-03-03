@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+--><root>
+     <row>
+		<voltage>50</voltage>
+		<power>125</power>
+	</row>
+	<row>
+		<voltage>135</voltage>
+		<power>90</power>
+	</row>
+	<row>
+		<voltage>148</voltage>
+		<power>85</power>
+	</row>
+	<row>
+		<voltage>245</voltage>
+		<power>71</power>
+	</row>
+	<row>
+		<voltage>730</voltage>
+		<power>29</power>
+	</row>
+	<row>
+		<voltage>800</voltage>
+		<power>25</power>
+	</row>
+	<row>
+		<voltage>850</voltage>
+		<power>22</power>
+	</row>
+	<row>
+		<voltage>1023</voltage>
+		<power>15</power>
+	</row>
+	<row>
+		<voltage/>
+		<power/>
+	</row>
+</root>

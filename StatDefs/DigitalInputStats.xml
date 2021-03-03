@@ -1,0 +1,296 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<root>
+    <field>
+		<size>72</size>
+        	<type>spare</type>
+    </field>
+	<field>
+		<name>MAINS</name>
+        	<text x="1">ON</text>
+		<text x="0">OFF</text>
+    </field>
+	<field>
+		<name>HV</name>
+        	<text x="1">ON</text>
+		<text x="0">OFF</text>
+    </field>
+	<field>
+		<name>MOD</name>
+        	<text x="1">ON</text>
+		<text x="0">OFF</text>
+    </field>
+	<field>
+		<name>READY INDICATION</name>
+        	<text x="1">READY</text>
+		<text x="0">NOT READY</text>
+    </field>	
+	<field>
+		<name>EXTERNAL SENSOR INTERLOCK</name>
+        	<text x="0">OK</text>
+        	<error>1</error>
+    </field>
+	<field>
+		<name>EXTERNAL MOD INDICATION</name>
+        	<text x="1">ON</text>
+		<text x="0">OFF</text>
+    </field>
+	<field>
+		<name>EXCESS DUTY CYCLE</name>
+        	<text x="0">OK</text>
+        	<error>1</error>
+    </field>		
+	<field>
+		<name>BODY/HELIX OVER CURRENT</name>
+        	<text x="1">OK</text>
+        	<error>0</error>
+    </field>
+	<field>
+		<size>1</size>
+        	<type>spare</type>
+    </field>
+	<field>
+		<name>OPERATING MODE</name>
+        	<text x="1">REMOTE</text>
+        	<text x="0">LOCAL</text>
+    </field>
+	<field>
+		<name>OVER TEMPERATURE</name>
+        	<text x="0">OK</text>
+        	<error>1</error>
+    </field>
+	<field>
+		<name>RESET</name>
+        	<text x="1">OK</text>
+		<text x="0">NOT OK</text>
+    </field>
+	<field>
+		<name>MOD PULSE SOURCE</name>
+        	<text x="1">EXTERNAL</text>
+        	<text x="0">INTERNAL</text>
+    </field>
+	<field>
+		<name>INTERLOCK BIT</name>
+        	<text x="1">OK</text>
+        	<error>0</error>
+    </field>
+	<field>
+		<name>CATHODE OVER CURRENT</name>
+        	<text x="1">OK</text>
+        	<error>0</error>
+    </field>								
+	<field>
+		<name>EXCESS VSWR</name>
+        	<text x="1">OK</text>
+        	<error>0</error>
+    </field>		
+</root>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<root>
+	<PRF>
+		<max>20</max>
+		<min>0.1</min>
+	</PRF>
+	<PW>
+		<max>13</max>
+		<min>0.2</min>
+	</PW>
+	<GridPulseVoltage>
+		<max>3000</max>
+		<min>0</min>
+	</GridPulseVoltage>
+	<CathodeVoltage>
+		<max>-16</max>
+		<min>-20</min>
+	</CathodeVoltage>
+	<CollectorCurrent>
+		<max>20</max>
+		<min>0</min>
+	</CollectorCurrent>
+	<HelixCurrent>
+		<max>5</max>
+		<min>0</min>
+	</HelixCurrent>
+	<FilamentVoltage>
+		<max>10</max>
+		<min>0</min>
+	</FilamentVoltage>
+	<PRESSUREHIGH>1280.0</PRESSUREHIGH>
+	<PRESSURELOW>1220.0</PRESSURELOW>
+	<TEMPHIGH>92.0</TEMPHIGH>
+	<VSWRHIGH>1.8</VSWRHIGH>
+	<INPUTHIGH>8.0</INPUTHIGH>
+	<INPUTLOW>5.0</INPUTLOW>
+	<OUTPUTHIGH>800.0</OUTPUTHIGH>
+	<OUTPUTLOW>600.0</OUTPUTLOW>
+	<FVLimit>1.2</FVLimit>
+	<CVLimit>1</CVLimit>
+	<BVLimit>5</BVLimit>
+</root>

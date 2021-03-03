@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<root>
+    <field>
+		<type>spare</type>
+         	<size>48</size>
+    </field>	    	
+	<field>
+		<name>RF INPUT (dBm)</name>
+         	<size>16</size>
+    </field>
+	<field>
+		<name>RF OUTPUT (dBm)</name>
+         	<size>16</size>
+    </field>
+	<field>
+		<name>RETURN LOSS (dB)</name>
+         	<size>16</size>
+    </field>
+	<field>
+		<name>COLLECTOR:TEMPERATURE (C)</name>
+         	<size>16</size>
+    </field>	
+	<field>
+		<name>PRESSURE (PSI)</name>
+         	<size>16</size>
+    </field>
+	<field>
+		<type>spare</type>
+         	<size>80</size>
+    </field>		    	    					
+	<field>
+		<name>DOOR</name>
+         	<size>1</size>
+		<text x="1">OPEN</text>
+		<text x="0">CLOSED</text>
+		<error>1</error>
+    </field>
+	<field>
+		<type>spare</type>
+         	<size>7</size>
+    </field>
+	<field>
+		<type>spare</type>
+         	<size>8</size>
+    </field>
+	<field>
+		<name>COLLECTOR:THERMAL SWITCH</name>
+         	<size>1</size>
+		<text x="0">OK</text>
+		<error>1</error>
+    </field>
+	<field>
+		<type>spare</type>
+         	<size>7</size>
+    </field>
+	<field>
+		<type>spare</type>
+         	<size>8</size>
+    </field>
+	<field>
+		<name>BLOWER</name>
+         	<size>1</size>
+		<text x="0">OK</text>
+		<error>1</error>
+    </field>
+	<field>
+		<type>spare</type>
+         	<size>7</size>
+    </field>
+	<field>
+		<type>spare</type>
+         	<size>8</size>
+    </field>
+	<field>
+		<name>ARC DETECTOR</name>
+         	<size>1</size>
+		<text x="0">OK</text>
+		<error>1</error>
+    </field>
+	<field>
+		<type>spare</type>
+         	<size>7</size>
+    </field>
+	<field>
+		<type>spare</type>
+         	<size>8</size>
+    </field>
+	<field>
+		<name>Oil</name>
+         	<size>1</size>
+		<text x="0">OK</text>
+		<error>1</error>
+    </field>
+	<field>
+		<type>spare</type>
+         	<size>7</size>
+    </field>
+	<field>
+		<type>spare</type>
+         	<size>8</size>
+    </field>
+	<field>
+		<name>VSWR</name>
+         	<size>1</size>
+		<text x="0">OK</text>
+		<error>1</error>
+    </field>
+	<field>
+		<type>spare</type>
+         	<size>7</size>
+    </field>
+	<field>
+		<type>spare</type>
+         	<size>8</size>
+    </field>
+	<field>
+		<name>EXCESS RF</name>
+         	<size>1</size>
+		<text x="0">OK</text>
+		<error>1</error>
+    </field>
+	<field>
+		<type>spare</type>
+         	<size>7</size>
+    </field>
+	<field>
+		<type>spare</type>
+         	<size>8</size>
+    </field>
+	<field>
+		<name>PRESSURE</name>
+         	<size>1</size>
+		<text x="0">OK</text>
+		<error>1</error>
+    </field>
+</root>
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

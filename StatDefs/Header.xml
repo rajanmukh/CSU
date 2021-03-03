@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<root>
+    <field>
+		<name>txID</name>
+         	<size>16</size>
+    </field>	    	
+	<field>
+		<name>protID</name>
+         	<size>16</size>
+    </field>		
+	<field>
+		<name>byteCount</name>
+         	<size>16</size>
+    </field>
+	<field>
+		<name>slaveaddr</name>
+         	<size>8</size>
+    </field>
+	<field>
+		<name>commandCode</name>
+         	<size>8</size>
+    </field>
+	<field>
+		<name>noOfDataBytes</name>
+         	<size>8</size>
+    </field>
+</root>
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<root>
+	<DIL>0</DIL>
+	<CTIL>0</CTIL>
+	<BIL>0</BIL>
+	<ADIL>0</ADIL>
+	<PRESSURE>1</PRESSURE>
+	<TEMP>1</TEMP>
+	<VSWR>0</VSWR>
+	<INPUT>1</INPUT>
+	<OUTPUT>0</OUTPUT>
+	<FVV>1</FVV>
+	<CVV>1</CVV>
+	<BVV>0</BVV>
+</root>
