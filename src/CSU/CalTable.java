@@ -207,20 +207,24 @@ public class CalTable extends javax.swing.JPanel {
         }
     }
     public double getXfromY(double Y, int tableno) {
-        int L = 0, R = tablelen[tableno]-1;
-        while (L < R) {
-            int m = (L + R) / 2;
-            if (y[tableno][m] < Y) {
-                L = m + 1;
-            } else {
-                R = m;
-            }
+        int length = tablelen[tableno];
+        double[] diff=new double[length];
+        for(int i=0;i<length;i++){
+            diff[i]=Math.abs(Y-y[tableno][i]);            
         }
-        if (L == 0) {
+        double minimum=diff[0];
+        int index=0;
+        for(int i=1;i<length;i++){
+            if(diff[i]<=minimum){
+                minimum=diff[i];
+                index=i;
+            }        
+        }
+        if (index == 0) {
             return x[tableno][0];
         } else {
-            double f = ((double) (Y - y[tableno][L - 1])) / (y[tableno][L] - y[tableno][L - 1]);
-            double X = x[tableno][L - 1] + f * (x[tableno][L] - x[tableno][L - 1]);
+            double f = ((double) (Y - y[tableno][index - 1])) / (y[tableno][index] - y[tableno][index - 1]);
+            double X = x[tableno][index - 1] + f * (x[tableno][index] - x[tableno][index - 1]);
             return X;
         }
     }

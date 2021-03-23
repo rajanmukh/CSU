@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <root>
 	<header>####</header>
-	<PRF>5.0</PRF>
-	<PRFcount>800000000000000</PRFcount>
+	<PRF>1.0</PRF>
+	<PRFcount>0</PRFcount>
 	<zeroKmDelay>0.0</zeroKmDelay>
 	<pulseWidth>3.0</pulseWidth>
 	<baudWidth>0.18</baudWidth>
@@ -14,27 +14,27 @@
 	<codeBbar>1110110111100010111011010001110111101101111000100001001011100010</codeBbar>
 	<modeSel>0</modeSel>
 	<TxTrig1delay>1.0</TxTrig1delay>
-	<TxTrig1width>10.0</TxTrig1width>
+	<TxTrig1width>4.05</TxTrig1width>
 	<BISWpredelay>4.0</BISWpredelay>
 	<BISWwidth>6.0</BISWwidth>
 	<TxTrig2delay>1.0</TxTrig2delay>
-	<TxTrig2width>8.0</TxTrig2width>
+	<TxTrig2width>3.0</TxTrig2width>
 	<SIMpredelay>0.0</SIMpredelay>
 	<SIMwidth>0.0</SIMwidth>
 	<STCpredelay>0.0</STCpredelay>
 	<STCwidth>0.0</STCwidth>
 	<intbypass1>0</intbypass1>
-	<intbypass2>11</intbypass2>
-	<outpwrhigh>800.0</outpwrhigh>
-	<outpwrlow>600.0</outpwrlow>
+	<intbypass2>1</intbypass2>
+	<outpwrhigh>704.0</outpwrhigh>
+	<outpwrlow>655.0</outpwrlow>
 	<VSWRhigh>1.0</VSWRhigh>
 	<spare1>0</spare1>
-	<inpwrhigh>8.0</inpwrhigh>
-	<inpwrlow>5.0</inpwrlow>
-	<temphigh>92.0</temphigh>
+	<inpwrhigh>666.0</inpwrhigh>
+	<inpwrlow>340.0</inpwrlow>
+	<temphigh>130.0</temphigh>
 	<spare2>0</spare2>
-	<pressurehigh>1280.0</pressurehigh>
-	<pressurelow>1220.0</pressurelow>
+	<pressurehigh>24.0</pressurehigh>
+	<pressurelow>18.0</pressurelow>
 	<footer>&amp;&amp;&amp;&amp;</footer>
 	<Tx2Trig2Traildelay>0.05</Tx2Trig2Traildelay>
 </root>

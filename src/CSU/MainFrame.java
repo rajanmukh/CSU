@@ -169,6 +169,7 @@ public class MainFrame extends javax.swing.JFrame {
     private int[] map2 = new int[]{5, 8, 7, 6};
     private final IntByp intByp2;
     private final IntByp intByp3;
+    private double VSWRLIMIT;
 
     /**
      * Creates new form NewJFrame
@@ -305,14 +306,14 @@ public class MainFrame extends javax.swing.JFrame {
         intByp2.rearrangeCheckBoxes();
         intByp2.setBackground(Color.WHITE);
         XMLReadWrite reader = new XMLReadWrite("limits.xml");
-        
+
         Border bib2 = new Border(intByp2);
         gridBagConstraints.gridx = 1;
         gridBagConstraints.weightx = .375;
         intbyppanel.add(bib2, gridBagConstraints);
         intByp3 = new IntByp(8);
         intByp3.setBackground(Color.WHITE);
-        
+
         String fvlimittext = reader.getTextByTag("FVLimit");
         String cvlimittext = reader.getTextByTag("CVLimit");
         String bvlimittext = reader.getTextByTag("BVLimit");
@@ -337,14 +338,13 @@ public class MainFrame extends javax.swing.JFrame {
                     String[] tags = {"DIL", "CTIL", "BIL", "ADIL"};
                     for (int i = 0; i < 4; i++) {
                         if (intByp1.chks[i].isSelected()) {
-                            senseFrame.intbypass1.setBit(5-i);
+                            senseFrame.intbypass1.setBit(5 - i);
                             writer.Write(tags[i], "1");
                         } else {
-                            senseFrame.intbypass1.resetBit(5-i);
+                            senseFrame.intbypass1.resetBit(5 - i);
                             writer.Write(tags[i], "0");
                         }
                     }
-                    
 
                     //for int byp2
                     String[] tags2 = {"PRESSURE", "TEMP", "VSWR", "INPUT", "OUTPUT"};
@@ -357,34 +357,34 @@ public class MainFrame extends javax.swing.JFrame {
                             writer.Write(tags2[i], "0");
                         }
                     }
-                    double[] hardlimits = {2000,1000,100,2,10,5,1000,500};
+                    double[] hardlimits = {24, 18, 100, 2, 13, 7, 64.88, 63.88};
                     double[] byp2limits = new double[8];
-                    boolean[] limexceeded=new boolean[8];
+                    boolean[] limexceeded = new boolean[8];
                     //for int byp3
                     String fvaltext = intByp3.limit[0].getText();
                     String cvaltext = intByp3.limit[1].getText();
                     String bvaltext = intByp3.limit[2].getText();
                     try {
                         for (int i = 0; i < 8; i++) {
-                            byp2limits[i] = Double.parseDouble(intByp2.limit[i].getText());                            
+                            byp2limits[i] = Double.parseDouble(intByp2.limit[i].getText());
                         }
-                        limexceeded[0]=byp2limits[0]>hardlimits[0];
-                        limexceeded[1]=byp2limits[1]<hardlimits[1];
-                        limexceeded[2]=byp2limits[2]>hardlimits[2];
-                        limexceeded[3]=byp2limits[3]>hardlimits[3];
-                        limexceeded[4]=byp2limits[4]>hardlimits[4];
-                        limexceeded[5]=byp2limits[5]<hardlimits[5];
-                        limexceeded[6]=byp2limits[6]>hardlimits[6];
-                        limexceeded[7]=byp2limits[7]<hardlimits[7];
-                        boolean overall=false;
-                        for(int i=0;i<8;i++){
-                            overall=overall || limexceeded[i];
+                        limexceeded[0] = byp2limits[0] > hardlimits[0];
+                        limexceeded[1] = byp2limits[1] < hardlimits[1];
+                        limexceeded[2] = byp2limits[2] > hardlimits[2];
+                        limexceeded[3] = byp2limits[3] > hardlimits[3];
+                        limexceeded[4] = byp2limits[4] > hardlimits[4];
+                        limexceeded[5] = byp2limits[5] < hardlimits[5];
+                        limexceeded[6] = byp2limits[6] > hardlimits[6];
+                        limexceeded[7] = byp2limits[7] < hardlimits[7];
+                        boolean overall = false;
+                        for (int i = 0; i < 8; i++) {
+                            overall = overall || limexceeded[i];
                         }
                         boolean[] inconcistencies = new boolean[3];
-                        inconcistencies[0]=byp2limits[0]<=byp2limits[1];
-                        inconcistencies[1]=byp2limits[4]<=byp2limits[5];
-                        inconcistencies[2]=byp2limits[6]<=byp2limits[7];
-                        overall=overall || inconcistencies[0] || inconcistencies[1] || inconcistencies[2];
+                        inconcistencies[0] = byp2limits[0] <= byp2limits[1];
+                        inconcistencies[1] = byp2limits[4] <= byp2limits[5];
+                        inconcistencies[2] = byp2limits[6] <= byp2limits[7];
+                        overall = overall || inconcistencies[0] || inconcistencies[1] || inconcistencies[2];
                         double fval = Double.parseDouble(fvaltext);
                         double cval = Double.parseDouble(cvaltext);
                         double bval = Double.parseDouble(bvaltext);
@@ -392,24 +392,24 @@ public class MainFrame extends javax.swing.JFrame {
                         boolean climexceeded = cval > 1;//hard limits
                         boolean blimexceeded = bval > 5;//hard limits
 
-                        String[] messages={"Pressure upper limit is too high","Pressure lower limit is too low",
-                            "Temperature upper limit is too high","VSWR upper limit is too high",
-                            "Input power upper limit is too high","Input power lower limit is too low",
-                            "Output power upper limit is too high","Output power lower limit is too low"};
-                        for (int i=0;i<8;i++){
-                            if(limexceeded[i]){
+                        String[] messages = {"Pressure upper limit is too high", "Pressure lower limit is too low",
+                            "Temperature upper limit is too high", "VSWR upper limit is too high",
+                            "Input power upper limit is too high", "Input power lower limit is too low",
+                            "Output power upper limit is too high", "Output power lower limit is too low"};
+                        for (int i = 0; i < 8; i++) {
+                            if (limexceeded[i]) {
                                 JOptionPane.showMessageDialog(null, messages[i]);
                                 break;
                             }
                         }
-                        String[] messages1={"Pressure","Input power","Output power"};
-                        for (int i=0;i<3;i++){
-                            if(inconcistencies[i]){
-                                JOptionPane.showMessageDialog(null, messages1[i]+" upper limit should be greater than lower limit");
+                        String[] messages1 = {"Pressure", "Input power", "Output power"};
+                        for (int i = 0; i < 3; i++) {
+                            if (inconcistencies[i]) {
+                                JOptionPane.showMessageDialog(null, messages1[i] + " upper limit should be greater than lower limit");
                                 break;
                             }
                         }
-                        
+
                         if (flimexceeded) {
                             JOptionPane.showMessageDialog(null, "Filament voltage variation limit should be within 1.2");
                         }
@@ -419,7 +419,7 @@ public class MainFrame extends javax.swing.JFrame {
                         if (blimexceeded) {
                             JOptionPane.showMessageDialog(null, "Beam voltage variation limit should be within 5");
                         }
-                        overall = overall || flimexceeded || climexceeded || blimexceeded; 
+                        overall = overall || flimexceeded || climexceeded || blimexceeded;
                         if (!overall) {
                             //save in current variables for immediate use
                             FVLimit = fval;
@@ -437,28 +437,34 @@ public class MainFrame extends javax.swing.JFrame {
                             writer.Write("FVLimit", fvaltext);
                             writer.Write("CVLimit", cvaltext);
                             writer.Write("BVLimit", bvaltext);
-                            tags=new String[]{"PRESSUREHIGH","PRESSURELOW","TEMPHIGH","VSWRHIGH","INPUTHIGH","INPUTLOW","OUTPUTHIGH","OUTPUTLOW"};
-                            for(int i=0;i<8;i++){
+                            tags = new String[]{"PRESSUREHIGH", "PRESSURELOW", "TEMPHIGH", "VSWRHIGH", "INPUTHIGH", "INPUTLOW", "OUTPUTHIGH", "OUTPUTLOW"};
+                            for (int i = 0; i < 8; i++) {
                                 writer.Write(tags[i], String.valueOf(byp2limits[i]));
-                            }                            
+                            }
                             writer.printToFile();
                             senseFrame.pressurehigh.setValueWithDecimal(byp2limits[0]);
                             senseFrame.pressurelow.setValueWithDecimal(byp2limits[1]);
-                            senseFrame.temphigh.setValueWithDecimal(byp2limits[2]);
+                            double mv0 = calTable1.getXfromY(byp2limits[2], 3);
+                            senseFrame.temphigh.setValueWithDecimal(mv0);
                             senseFrame.VSWRhigh.setValueWithDecimal(byp2limits[3]);
-                            senseFrame.inpwrhigh.setValueWithDecimal(byp2limits[4]);
-                            senseFrame.inpwrlow.setValueWithDecimal(byp2limits[5]);
-                            senseFrame.outpwrhigh.setValueWithDecimal(byp2limits[6]);
-                            senseFrame.outpwrlow.setValueWithDecimal(byp2limits[7]);
-                            
+                            VSWRLIMIT = senseFrame.VSWRhigh.getValueWithDecimal();
+                            double mv1 = calTable1.getXfromY(byp2limits[4], 0);
+                            senseFrame.inpwrhigh.setValueWithDecimal(mv1);
+                            double mv2 = calTable1.getXfromY(byp2limits[5], 0);
+                            senseFrame.inpwrlow.setValueWithDecimal(mv2);
+                            double mv3 = calTable1.getXfromY(byp2limits[6], 1);
+                            senseFrame.outpwrhigh.setValueWithDecimal(mv3);
+                            double mv4 = calTable1.getXfromY(byp2limits[7], 1);
+                            senseFrame.outpwrlow.setValueWithDecimal(mv4);
+
                             writer = new XMLReadWrite("senseElParams.xml");
-                            
-                            int offset=senseFrame.intbypass1.fieldindex;
-                            for(int i=offset;i<offset+12;i++){
-                                writer.Write(senseFrame.field[i].getName(),senseFrame.field[i].getValueAsString());
-                            }                            
+
+                            int offset = senseFrame.intbypass1.fieldindex;
+                            for (int i = offset; i < offset + 12; i++) {
+                                writer.Write(senseFrame.field[i].getName(), senseFrame.field[i].getValueAsString());
+                            }
                             writer.printToFile();
-                            
+
                             byte[] packetS = senseFrame.getPacket();
                             sendtoSenseElectronics(packetS);
                             System.out.println(packetS[80]);
@@ -579,6 +585,7 @@ public class MainFrame extends javax.swing.JFrame {
         digitalctrlframe = new ModDigitalCtrlFrame();
         senseFrame = new SenseElectronicsFormat();
         senseFrame.loadFromFile("senseElParams.xml");
+        VSWRLIMIT = senseFrame.VSWRhigh.getValueWithDecimal();
         for (int i = 0; i < 6; i++) {
             analogMonitoring.setLabel(0, i, analogstat.fields.get(i).getName());
         }
@@ -637,7 +644,7 @@ public class MainFrame extends javax.swing.JFrame {
         intByp2.chks[3].setSelected(chkstat);
         chkstat = reader.getTextByTag("OUTPUT").equalsIgnoreCase("1");
         intByp2.chks[4].setSelected(chkstat);
-        
+
         intByp2.setheading("EXTERNAL:SENSOR");
         intByp2.setLabel(0, "PRESSURE:HIGH LIMIT");
         intByp2.setLabel(1, "PRESSURE:LOW LIMIT");
@@ -648,13 +655,12 @@ public class MainFrame extends javax.swing.JFrame {
         intByp2.setLabel(6, "RF OUTPUT:HIGH LIMIT");
         intByp2.setLabel(7, "RF OUTPUT:LOW LIMIT");
         reader = new XMLReadWrite("limits.xml");
-        String[] tags=new String[]{"PRESSUREHIGH","PRESSURELOW","TEMPHIGH","VSWRHIGH","INPUTHIGH","INPUTLOW","OUTPUTHIGH","OUTPUTLOW"};
-        
-        for(int i=0;i<8;i++){
+        String[] tags = new String[]{"PRESSUREHIGH", "PRESSURELOW", "TEMPHIGH", "VSWRHIGH", "INPUTHIGH", "INPUTLOW", "OUTPUTHIGH", "OUTPUTLOW"};
+
+        for (int i = 0; i < 8; i++) {
             intByp2.limit[i].setText(reader.getTextByTag(tags[i]));
         }
-        
-        
+
         reader = new XMLReadWrite("interlockconfig.xml");
         intByp3.setheading("EIK:MODULATOR");
         intByp3.setLabel(0, "FILAMENT VOLTAGE:VARIATION");
@@ -1019,13 +1025,13 @@ public class MainFrame extends javax.swing.JFrame {
                         Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
                     }
                     if (!senseElConnected) {
-                        new Thread(){
+                        new Thread() {
                             @Override
                             public void run() {
                                 connectToSensorElectronics();
-                            }                            
+                            }
                         }.start();
-                        
+
                     } else {
                         JOptionPane.showMessageDialog(null, "Sensor Electronics already connected");
                     }
@@ -1312,7 +1318,7 @@ public class MainFrame extends javax.swing.JFrame {
                             pwchoose.setText(text2);
 
                         }
-                        if (dutyOK && (w2 * prf <= 54) && (d3 >= 0.2) && (w2 - d3 - w3 >= 0.2) && (w2>w3)) {
+                        if (dutyOK && (w2 * prf <= 54) && (d3 >= 0.2) && (w2 - d3 - w3 >= 0.2) && (w2 > w3)) {
                             for (int i = 0; i < num; i++) {
                                 xmlReadWrite.Write(names[i], vals[i].getText());
                             }
@@ -3497,14 +3503,32 @@ public class MainFrame extends javax.swing.JFrame {
             displayFrame.rdisp[i].setText("");
         }
         for (int i = 0; i < 5; i++) {
+            double fwdPwr = 0, revPwr;
+            String str;
             if (i < 4) {
                 int valx = senseStatus.fields.get(i).getValue();
                 int valxx = 4 * (valx / 4);
                 double valy = this.calTable1.getYfromX(valxx, i);
-                analogMonitoring.setValue(1, i, String.format("%.1f", valy));
+                if (i == 1) {
+                    fwdPwr = valy;
+                }
+                if (i == 2) {
+                    revPwr = valy;
+
+                    double retLoss = fwdPwr-revPwr;
+                    double r = Math.exp(0.115 * retLoss);
+                    double vswr = (r + 1) / (r - 1);
+                    if (vswr > VSWRLIMIT) {
+                        stopMTSG(null);
+                    }
+                    str = String.format("%.1f", retLoss);
+                } else {
+                    str = String.format("%.1f", valy);
+                }
             } else {
-                analogMonitoring.setValue(1, i, senseStatus.fields.get(i).getText());
+                str = senseStatus.fields.get(i).getText();
             }
+            analogMonitoring.setValue(1, i, str);
         }
         for (int i = 0; i < 4; i++) {
             int status = senseStatus.fields.get(map2[i]).getStatus();
