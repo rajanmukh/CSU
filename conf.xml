@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <root>
 	<CathodeVoltage>-15</CathodeVoltage>
-	<GridVoltage>-51</GridVoltage>
-	<FilamentVoltage>6.1</FilamentVoltage>
-	<IPAddressM>192.168.1.5</IPAddressM>
-	<portnoM>502</portnoM>
-	<IPAddressS>192.168.1.30</IPAddressS>
+	<GridVoltage>-50</GridVoltage>
+	<FilamentVoltage>-6</FilamentVoltage>
+	<IPAddressM>127.0.0.1</IPAddressM>
+	<portnoM>20000</portnoM>
+	<IPAddressS>127.0.0.1</IPAddressS>
 	<portnoS>3434</portnoS>
 </root>

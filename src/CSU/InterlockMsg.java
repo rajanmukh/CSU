@@ -29,6 +29,7 @@ public class InterlockMsg extends JPanel {
     private boolean show;
     private JLabel notification1, notification2;
     private int count;
+    private String faultInfo;
 
     public InterlockMsg() {
         setPreferredSize(new Dimension(0, 0));
@@ -64,7 +65,7 @@ public class InterlockMsg extends JPanel {
             public void actionPerformed(ActionEvent e) {
                 if (show) {
                     alert.setBorder(BorderFactory.createLineBorder(Color.RED));
-                    alert.setText("Check Interlock");
+                    alert.setText("Check Interlock: "+faultInfo);
                 } else {
                     alert.setBorder(null);
                     alert.setText("");
@@ -112,5 +113,9 @@ public class InterlockMsg extends JPanel {
                 delaytick.stop();
             }
         }
+    }
+
+    void setFaultDetail(String text) {
+        faultInfo=text;
     }
 }

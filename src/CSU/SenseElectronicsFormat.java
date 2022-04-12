@@ -90,7 +90,7 @@ public class SenseElectronicsFormat extends Packet {
         field[index++] = intbypass2 = new Intfield("intbypass2", 1);//81
         field[index++] = outpwrhigh = new Intxfield("outpwrhigh", 2, 1);//82
         field[index++] = outpwrlow = new Intxfield("outpwrlow", 2, 1);//84
-        field[index++] = VSWRhigh = new Intxfield("VSWRhigh", 2, 1);//86
+        field[index++] = VSWRhigh = new Intxfield("VSWRhigh", 2, 100);//86
         field[index++] = spare1 = new Intfield("spare1", 2);//88
         field[index++] = inpwrhigh = new Intxfield("inpwrhigh", 2, 1);//90
         field[index++] = inpwrlow = new Intxfield("inpwrlow", 2, 1);//92

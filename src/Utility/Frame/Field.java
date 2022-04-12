@@ -52,4 +52,5 @@ public class Field {
     public int getStatus() {
         return 0;
     }
+    
 }

@@ -6,7 +6,6 @@ package CSU;
 
 import Utility.Frame.Intfield;
 import Utility.Frame.Packet;
-import Utility.Frame.Status;
 
 /**
  *
@@ -22,9 +21,7 @@ public class ModStatReqFrame extends Packet {
     Intfield commandcode;
     Intfield readlocation;
     Intfield noOfBytesToRead;
-    byte[] analogReqPacket;
-    byte[] digitalInputReqPacket;
-    byte[] digitalOutputReqPacket;
+    byte[] statReqPacket;
 
     public ModStatReqFrame() {
         super(7);
@@ -37,43 +34,19 @@ public class ModStatReqFrame extends Packet {
         field[index++] = readlocation = new Intfield("readlocation", 2);
         field[index++] = noOfBytesToRead = new Intfield("noOfBytesToRead", 2);
 
-        txID.setValue(0);
+        txID.setValue(new byte[]{10,1});
         protID.setValue(0);
         bytecount.setValue(6);
-        slaveaddr.setValue(0);
-        //
+        slaveaddr.setValue(1);
         commandcode.setValue(3);
-        readlocation.setValue(new byte[]{16, 16});
-        noOfBytesToRead.setValue(8);
-        analogReqPacket = new byte[12];
-        super.getDataBytes(analogReqPacket);
-        //
-        commandcode.setValue(2);
-        readlocation.setValue(new byte[]{0, 4});
-        noOfBytesToRead.setValue(16);
-        digitalInputReqPacket = new byte[12];
-        super.getDataBytes(digitalInputReqPacket);
-        //
-        commandcode.setValue(1);
-        readlocation.setValue(new byte[]{0, 5});
-        noOfBytesToRead.setValue(5);
-        digitalOutputReqPacket = new byte[12];
-        super.getDataBytes(digitalOutputReqPacket);
+        readlocation.setValue(new byte[]{100,0});
+        noOfBytesToRead.setValue(20);
+        statReqPacket=new byte[12];
+        super.getDataBytes(statReqPacket);
     }
-
-    public byte[] getPacket(int tag) {
-        byte[] buf=null;
-        switch(tag){
-            case Status.ANALOG:
-                buf=analogReqPacket;
-                break;
-            case Status.DIGITALINPUT:
-                buf=digitalInputReqPacket;
-                break;
-            case Status.DIGITALOUTPUT:
-                buf=digitalOutputReqPacket;
-        }
-        return buf;
+    
+    public byte[] getPacket() {
+            return statReqPacket;
     }
 
 }

@@ -1,0 +1,492 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<root>
+    <field>
+		<size>72</size>
+        	<type>spare</type>
+    </field>
+	<field>
+		<name>BYPASS</name>
+        	<text x="1">OK</text>
+        	<error>0</error>
+    </field>
+	<field>
+		<name>MAINS</name>
+        	<size>2</size>
+		<text x="1">OFF</text>
+		<text x="2">ON</text>
+    </field>
+	<field>
+		<name>HV</name>
+        	<text x="1">ON</text>
+		<text x="0">OFF</text>
+    </field>
+	<field>
+		<name>MOD</name>
+        	<text x="1">ON</text>
+		<text x="0">OFF</text>
+    </field>
+	<field>
+		<name>RESET</name>
+        	<text x="1">ON</text>
+		<text x="0">OFF</text>
+    </field>
+	<field>
+		<size>2</size>
+        	<type>spare</type>
+    </field>
+	<field>
+		<name>READY</name>
+        	<text x="1">READY</text>
+        	<text x="1">NOT READY</text>
+    </field>
+	<field>
+		<name>CollectorOC</name>
+        	<text x="0">OK</text>
+        	<error>1</error>
+    </field>
+	<field>
+		<name>KOC</name>
+        	<text x="0">OK</text>
+        	<error>1</error>
+    </field>
+	<field>
+		<name>ExcessDuty</name>
+        	<text x="0">OK</text>
+        	<error>1</error>
+    </field>
+	<field>
+		<name>ExcessVSWR</name>
+        	<text x="0">OK</text>
+        	<error>1</error>
+    </field>
+	<field>
+		<name>ExtInt</name>
+        	<text x="1">EXTERNAL</text>
+		<text x="0">INTERNAL</text>
+    </field>
+	<field>
+		<name>KOT</name>
+        	<text x="0">OK</text>
+        	<error>1</error>
+    </field>
+	<field>
+		<name>COT</name>
+        	<text x="0">OK</text>
+        	<error>1</error>
+    </field>
+	
+	<field>
+		<size>24</size>
+        	<type>spare</type>
+    </field>
+	<field>
+		<name>FAULT_STATUS</name>
+        	<size>5</size>
+		<text x="0">OK</text>
+		<text x="1">Fillament OV</text>
+		<text x="2">Fillament OC</text>
+		<text x="3">Fillament UV</text>
+		<text x="4">Fillament UC</text>
+		<text x="5">Grid OV</text>
+		<text x="6">Grid UV</text>
+		<text x="7">Beam UV</text>
+		<text x="8">Beam OV</text>
+		<text x="9">Cathode OV</text>
+		<text x="10">Cathode OC</text>
+		<text x="11">Cathode UV</text>
+		<text x="12">Cathode OT</text>
+		<text x="13">Collector OV</text>
+		<text x="14">Collector OC</text>
+		<text x="15">Collector UV</text>
+		<text x="16">Collector OT</text>
+		<text x="17">Excess Duty</text>
+		<text x="18">Excess VSWR</text>
+		<text x="19">EXTINT1</text>
+		<text x="20">EXTINT2</text>
+		<text x="21">EMERGENCY_STOP</text>
+		<text x="22">NO_TRIGGER</text>
+		<text x="23">TRIGGER_VARIATION</text>
+		<error>1</error>
+		<error>2</error>
+		<error>3</error>
+		<error>4</error>
+		<error>5</error>
+		<error>6</error>
+		<error>7</error>
+		<error>8</error>
+		<error>9</error>
+		<error>10</error>
+		<error>11</error>
+		<error>12</error>
+		<error>13</error>
+		<error>14</error>
+		<error>15</error>
+		<error>16</error>
+		<error>17</error>
+		<error>18</error>
+		<error>19</error>
+		<error>20</error>
+		<error>21</error>
+		<error>22</error>
+		<error>23</error>
+    </field>
+	<field>
+		<size>3</size>
+        	<type>spare</type>
+    </field>
+
+	<field>
+		<name>EXT_INT1_IN</name>
+        	<text x="1"></text>
+		<text x="0"></text>
+    </field>
+	<field>
+		<name>EXT_INT2_IN</name>
+        	<text x="1"></text>
+		<text x="0"></text>
+    </field>	
+	<field>
+		<size>6</size>
+        	<type>spare</type>
+    </field>	
+	<field>
+		<name>MAINS_IN</name>
+        	<size>2</size>
+		<text x="1">OFF</text>
+		<text x="2">ON</text>
+    </field>
+	<field>
+		<name>HV_IN</name>
+        	<text x="1">ON</text>
+		<text x="0">OFF</text>
+    </field>
+	<field>
+		<name>MOD_IN</name>
+        	<text x="1">ON</text>
+		<text x="0">OFF</text>
+    </field>
+	<field>
+		<name>RESET_IN</name>
+        	<text x="1">ON</text>
+		<text x="0">OFF</text>
+    </field>
+	<field>
+		<name>MODE_IN</name>
+        	<text x="1">LOCAL</text>
+		<text x="0">REMOTE</text>
+    </field>
+	<field>
+		<name>PULSE_SOURCE_IN</name>
+        	<text x="1">INT</text>
+		<text x="0">EXT</text>
+    </field>	
+	<field>
+		<name>VSWR_IN</name>
+        	<text x="1"></text>
+		<text x="0"></text>
+    </field>	
+	<field>
+		<size>8</size>
+        	<type>spare</type>
+    </field>
+	<field>
+		<name>COT_BYPASS_IN</name>
+        	<text x="1">ENABLED</text>
+		<text x="0">DISABLED</text>
+    </field>
+	<field>
+		<name>KOT_BYPASS_IN</name>
+        	<text x="1">ENABLED</text>
+		<text x="0">DISABLED</text>
+    </field>
+<field>
+		<name>EXT_INT_BYPASS_IN</name>
+        	<text x="1">ENABLED</text>
+		<text x="0">DISABLED</text>
+    </field>
+	<field>
+		<name>BYPASS_IN</name>
+        	<text x="1">ENABLED</text>
+		<text x="0">DISABLED</text>
+    </field>
+	<field>
+		<name>HOC_BYPASS_IN</name>        	
+        	<text x="1">ENABLED</text>
+		<text x="0">DISABLED</text>
+    </field>
+	<field>
+		<name>KOC_BYPASS_IN</name>        	
+        	<text x="1">ENABLED</text>
+		<text x="0">DISABLED</text>
+    </field>
+	<field>
+		<name>EXCESS_DUTY_BYPASS_IN</name>
+        	<text x="1">ENABLED</text>
+		<text x="0">DISABLED</text>
+    </field>
+	<field>
+		<name>EXCESS_VSWR_BYPASS_IN</name>
+        	<text x="1">ENABLED</text>
+		<text x="0">DISABLED</text>
+    </field>	
+	<field>
+		<name>Filament_Voltage(V)</name>
+         	<size>16</size>
+		<factor>-1000</factor>
+    </field>
+	<field>
+		<name>Filament_Current(V)</name>
+         	<size>16</size>
+		<factor>1000</factor>
+    </field>
+	<field>
+		<name>Grid_Voltage(V)</name>
+         	<size>16</size>
+		<factor>-100</factor>
+    </field>
+	<field>
+		<name>Beam_Voltage(V)</name>
+         	<size>16</size>
+		<factor>-1000</factor>
+    </field>
+	<field>
+		<name>Collector_Voltage(V)</name>
+         	<size>16</size>
+		<factor>1000</factor>
+    </field>
+	<field>
+		<name>Collector_Current(V)</name>
+         	<size>16</size>
+		<factor>100</factor>
+    </field>
+	<field>
+		<name>Cathode_Voltage(V)</name>
+         	<size>16</size>
+		<factor>-100</factor>
+    </field>
+	<field>
+		<name>Cathode_Current(V)</name>
+         	<size>16</size>
+		<factor>1000</factor>
+    </field>
+	<field>
+		<name>Ext_PRF(Hz)</name>
+         	<size>16</size>
+		<factor>10</factor>
+    </field>
+	<field>
+		<name>Ext_PW(us)</name>
+         	<size>16</size>
+		<factor>10</factor>
+    </field>
+</root>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

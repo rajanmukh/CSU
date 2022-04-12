@@ -9,7 +9,7 @@
 	<VSWR>0</VSWR>
 	<INPUT>0</INPUT>
 	<OUTPUT>0</OUTPUT>
-	<FVV>1</FVV>
-	<CVV>1</CVV>
+	<FVV>0</FVV>
+	<CVV>0</CVV>
 	<BVV>0</BVV>
 </root>

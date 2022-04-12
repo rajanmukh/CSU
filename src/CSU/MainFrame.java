@@ -86,6 +86,8 @@ public class MainFrame extends javax.swing.JFrame {
     private JButton subnav;
     private JCheckBox chk2;
     private JCheckBox chk1;
+    boolean intChk = true;
+    boolean extChk = true;
     private JTextField prfchoose;
     private JTextField pwchoose;
     double prf, pw;
@@ -98,8 +100,8 @@ public class MainFrame extends javax.swing.JFrame {
     private ButtonGroup group1;
     private ButtonGroup group2;
     javax.swing.border.Border normalborder;
-    ModAnalogCtrlFrame analogctrlframe;
-    ModDigitalCtrlFrame digitalctrlframe;
+    ModCtrlFrame analogctrlframe;
+    ModCtrlFrame digitalctrlframe;
     SenseElectronicsFormat senseFrame;
     private Socket socketM;
     private Socket socketS;
@@ -109,14 +111,16 @@ public class MainFrame extends javax.swing.JFrame {
     private JTextField CVtext;
     private JTextField BVtext;
     private JTextField FVtext;
+    private JTextField warmUPTimeText;
     private double CV;
     private double BV;
     private double FV;
+    private int warmUPTime;
     private double FVLimit, CVLimit, BVLimit;
     private boolean prfpwset = false;
     private JButton[] ons;
     private JButton[] offs;
-    private final ModAnalogStatFrame analogstat;
+    private final ModStatFrame analogstat;
     private MultiLineText connstat;
     private MyButton[] p1btns;
     private MyButton manual;
@@ -125,7 +129,7 @@ public class MainFrame extends javax.swing.JFrame {
     private JLabel[] p3results;
     private boolean configDone = false;
 //    private final Timer wdgTimer;
-    private byte[] bufM = new byte[30];
+    private byte[] bufM = new byte[49];
     private byte[] bufS = new byte[200];
     private volatile boolean autoONinprogress;
     private volatile boolean autoOFFinprogress;
@@ -146,10 +150,7 @@ public class MainFrame extends javax.swing.JFrame {
     private final Timer intResetTimer;
     private final Timer mainsONTimer;
     ModStatReqFrame modStatReqFrame;
-    ModStatusPacketHeader statheader;
-    int statreqcount = 0;
-    private final ModDigitalInStatFrame digitalInputstat;
-    private final ModDigitallOutStatFrame digitalOutputstat;
+    private final ModStatFrame digitalInputstat;
     private MTSGcommandFrame mtsgcommand;
     private MTSGcommandFrame senseAck;
     private ActionListener resetListener;
@@ -160,16 +161,20 @@ public class MainFrame extends javax.swing.JFrame {
     private final Timer autoONTimer, autoOFFTimer, manualTimer;
     private final Timer checkDelayTimer;
     private int[] autoONdelays = new int[]{0, 26000, 10000, 1000};
-    private int[] autoOFFdelays = new int[]{5000, 5000, 5000, 0};
+    private int[] autoOFFdelays = new int[]{2000, 2000, 2000, 0};
     private int currentStage = -1;
     private final int MAINS = 0, HV = 1, MOD = 2, RF = 3;
     private int FVfaultCount = 0, CVfaultCount = 0, BVfaultCount = 0;
     private final IntStat intStat2;
-    private int[] map1 = new int[]{6, 7, 9, 13, 12, 14, 4};
-    private int[] map2 = new int[]{5, 8, 7, 6};
+    private int[] map1 = new int[]{6, 7, 9, 8, 12, 11, 4};
+    private int[] map2 = new int[]{10, 13, 12, 11, 7, 9, 8, 6, 5};
     private final IntByp intByp2;
     private final IntByp intByp3;
     private double VSWRLIMIT;
+    private boolean VSWRinterlockset = false;
+    private boolean intSelected = false;
+    private boolean extSelected = true;
+    private int[] modFieldMap = new int[]{31, 37, 33, 32, 36, 38};
 
     /**
      * Creates new form NewJFrame
@@ -284,7 +289,7 @@ public class MainFrame extends javax.swing.JFrame {
         gridBagConstraints.weighty = 1;
         intstatpanel.add(bis1, gridBagConstraints);
         intStat2 = new IntStat(9);
-        intStat2.intReset.setVisible(false);
+        intStat2.intReset.setVisible(true);
         intStat2.addListener(resetListener);
         intStat2.setBackground(Color.WHITE);
         Border bis2 = new Border(intStat2);
@@ -389,7 +394,7 @@ public class MainFrame extends javax.swing.JFrame {
                         double cval = Double.parseDouble(cvaltext);
                         double bval = Double.parseDouble(bvaltext);
                         boolean flimexceeded = fval > 1.2;//hard limits
-                        boolean climexceeded = cval > 1;//hard limits
+                        boolean climexceeded = cval > 0.5;//hard limits
                         boolean blimexceeded = bval > 5;//hard limits
 
                         String[] messages = {"Pressure upper limit is too high", "Pressure lower limit is too low",
@@ -414,7 +419,7 @@ public class MainFrame extends javax.swing.JFrame {
                             JOptionPane.showMessageDialog(null, "Filament voltage variation limit should be within 1.2");
                         }
                         if (climexceeded) {
-                            JOptionPane.showMessageDialog(null, "Cathode voltage variation limit should be within 1");
+                            JOptionPane.showMessageDialog(null, "Cathode voltage variation limit should be within 0.5");
                         }
                         if (blimexceeded) {
                             JOptionPane.showMessageDialog(null, "Beam voltage variation limit should be within 5");
@@ -576,18 +581,21 @@ public class MainFrame extends javax.swing.JFrame {
         });
         mainsONTimer.setRepeats(false);
         modStatReqFrame = new ModStatReqFrame();
-        statheader = new ModStatusPacketHeader();
-        analogstat = new ModAnalogStatFrame();
-        digitalInputstat = new ModDigitalInStatFrame();
-        digitalOutputstat = new ModDigitallOutStatFrame();
+        ModStatFrame frame = new ModStatFrame();
+        analogstat = frame;
+        digitalInputstat = frame;
         senseStatus = new MTSGStatusFormat();
-        analogctrlframe = new ModAnalogCtrlFrame();
-        digitalctrlframe = new ModDigitalCtrlFrame();
+        ModCtrlFrame modCtrlFrame = new ModCtrlFrame();
+        analogctrlframe = modCtrlFrame;
+        digitalctrlframe = modCtrlFrame;
+        digitalctrlframe.setInt();//to match the initial default selection
+        digitalctrlframe.setRemote();
         senseFrame = new SenseElectronicsFormat();
         senseFrame.loadFromFile("senseElParams.xml");
         VSWRLIMIT = senseFrame.VSWRhigh.getValueWithDecimal();
+        
         for (int i = 0; i < 6; i++) {
-            analogMonitoring.setLabel(0, i, analogstat.fields.get(i).getName());
+            analogMonitoring.setLabel(0, i, analogstat.fields.get(modFieldMap[i]).getName());
         }
         for (int i = 0; i < 7; i++) {
             intStat1.setLabel(i, digitalInputstat.fields.get(map1[i]).getName());
@@ -757,25 +765,10 @@ public class MainFrame extends javax.swing.JFrame {
         jMenuItem15 = new javax.swing.JMenuItem();
         jMenu3 = new javax.swing.JMenu();
         statreq = new javax.swing.JMenuItem();
-        jMenuItem11 = new javax.swing.JMenuItem();
-        jMenuItem12 = new javax.swing.JMenuItem();
-        jMenuItem13 = new javax.swing.JMenuItem();
         sendStatReq2Sense = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Cloud Radar CSU");
-        addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                formMouseClicked(evt);
-            }
-        });
-        addWindowFocusListener(new java.awt.event.WindowFocusListener() {
-            public void windowGainedFocus(java.awt.event.WindowEvent evt) {
-                formWindowGainedFocus(evt);
-            }
-            public void windowLostFocus(java.awt.event.WindowEvent evt) {
-            }
-        });
         getContentPane().setLayout(new java.awt.GridBagLayout());
 
         jMenu1.setText("Tools");
@@ -881,6 +874,11 @@ public class MainFrame extends javax.swing.JFrame {
         jMenu5.add(jMenuItem14);
 
         jMenuItem15.setText("from archive");
+        jMenuItem15.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem15ActionPerformed(evt);
+            }
+        });
         jMenu5.add(jMenuItem15);
 
         jMenuBar1.add(jMenu5);
@@ -894,30 +892,6 @@ public class MainFrame extends javax.swing.JFrame {
             }
         });
         jMenu3.add(statreq);
-
-        jMenuItem11.setText("anstat");
-        jMenuItem11.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jMenuItem11ActionPerformed(evt);
-            }
-        });
-        jMenu3.add(jMenuItem11);
-
-        jMenuItem12.setText("dinstat");
-        jMenuItem12.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jMenuItem12ActionPerformed(evt);
-            }
-        });
-        jMenu3.add(jMenuItem12);
-
-        jMenuItem13.setText("doutstat");
-        jMenuItem13.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jMenuItem13ActionPerformed(evt);
-            }
-        });
-        jMenu3.add(jMenuItem13);
 
         sendStatReq2Sense.setText("stat req sense");
         sendStatReq2Sense.addActionListener(new java.awt.event.ActionListener() {
@@ -933,10 +907,6 @@ public class MainFrame extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
-    private void formMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_formMouseClicked
-        int i = 0;// TODO add your handling code here:
-    }//GEN-LAST:event_formMouseClicked
 
     private void jMenuItem5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem5ActionPerformed
         try {
@@ -1445,9 +1415,14 @@ public class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_stopMTSG
 
     private void startMTSG(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startMTSG
+        if (VSWRinterlockset) {
+            JOptionPane.showMessageDialog(null, "VSWR Interlock set");
+            return;
+        }
 
         byte[] buf1 = mtsgcommand.getPacket(Command.MTSGSTART);
         sendtoSenseElectronics(buf1);
+
     }//GEN-LAST:event_startMTSG
 
     private void downloadMTSG(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_downloadMTSG
@@ -1465,21 +1440,7 @@ public class MainFrame extends javax.swing.JFrame {
 
     private void statreqActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_statreqActionPerformed
         // TODO add your handling code here:
-        byte[] packet = null;
-        switch (statreqcount) {
-            case 0:
-                packet = modStatReqFrame.getPacket(Status.ANALOG);
-                break;
-            case 1:
-                packet = modStatReqFrame.getPacket(Status.DIGITALINPUT);
-                break;
-            case 2:
-                packet = modStatReqFrame.getPacket(Status.DIGITALOUTPUT);
-        }
-        statreqcount++;
-        if (statreqcount == 3) {
-            statreqcount = 0;
-        }
+        byte[] packet = modStatReqFrame.getPacket();
 
 //        for (int i = 0; i < 6; i++) {
 //            String text = getString(packet, 2 * i) + " " + getString(packet, 2 * i + 1);
@@ -1492,10 +1453,6 @@ public class MainFrame extends javax.swing.JFrame {
 
     }//GEN-LAST:event_statreqActionPerformed
 
-    private void formWindowGainedFocus(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowGainedFocus
-        // TODO add your handling code here:     
-    }//GEN-LAST:event_formWindowGainedFocus
-
     private void sendStatReq2SenseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sendStatReq2SenseActionPerformed
         // TODO add your handling code here:
         byte[] buf1 = mtsgcommand.getPacket(Command.SENSESTAT);
@@ -1506,24 +1463,6 @@ public class MainFrame extends javax.swing.JFrame {
             Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_sendStatReq2SenseActionPerformed
-
-    private void jMenuItem11ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem11ActionPerformed
-        // TODO add your handling code here:
-        this.statreqcount = 0;
-        this.statreqActionPerformed(null);
-    }//GEN-LAST:event_jMenuItem11ActionPerformed
-
-    private void jMenuItem12ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem12ActionPerformed
-        // TODO add your handling code here:
-        this.statreqcount = 1;
-        this.statreqActionPerformed(null);
-    }//GEN-LAST:event_jMenuItem12ActionPerformed
-
-    private void jMenuItem13ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem13ActionPerformed
-        // TODO add your handling code here:
-        this.statreqcount = 2;
-        this.statreqActionPerformed(null);
-    }//GEN-LAST:event_jMenuItem13ActionPerformed
 
     private void jMenuItem14ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem14ActionPerformed
 
@@ -1547,6 +1486,10 @@ public class MainFrame extends javax.swing.JFrame {
             plot.setVisible(true);
         }
     }//GEN-LAST:event_jMenuItem14ActionPerformed
+
+    private void jMenuItem15ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem15ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jMenuItem15ActionPerformed
     private String getString(byte[] buf, int index) {
         int val = buf[index];
         if (val < 0) {
@@ -1721,19 +1664,26 @@ public class MainFrame extends javax.swing.JFrame {
             p1btns[2].label.setColor(Color.BLACK);
             p1btns[3].setBackground(Color.RED);
             p1btns[3].label.setColor(Color.WHITE);
+            
 
             ActionListener intextListener = new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent ae) {
-                    if (ae.getSource() == p1btns[0]) {//int selection
+                    if (ae.getSource() == p1btns[0] && extSelected) {//int selection
                         digitalctrlframe.setInt();
                         p1btns[0].setBackground(Color.ORANGE);
-                    } else {//ext selection
+                    } else if (intSelected) {//ext selection
                         digitalctrlframe.setExt();
                         p1btns[1].setBackground(Color.ORANGE);
                     }
-                    byte[] packet = digitalctrlframe.getPacket();
-                    sendtoModulator(packet);
+                    if (verification2()) {
+                        analogctrlframe.beamOnVoltage.setValueWithDecimal(BV);
+                        analogctrlframe.cathodeVoltage.setValueWithDecimal(CV);
+                        analogctrlframe.filamentVoltage.setValueWithDecimal(FV);
+                        analogctrlframe.warmUpTimer.setValue(warmUPTime);
+                        byte[] packet = digitalctrlframe.getPacket();
+                        sendtoModulator(packet);
+                    }
                 }
             };
 
@@ -1768,7 +1718,7 @@ public class MainFrame extends javax.swing.JFrame {
             //label1.setBackground(Color.CYAN);
             label1.rectangle.label.setFonttype(Font.BOLD);
             label1.rectangle.label.setfontSize(12);
-            label1.setToolTipText("RANGE: -17kV to -15kV");
+            label1.setToolTipText("RANGE: -18kV to -15kV");
             MultiLineText label2 = new MultiLineText("BEAM ON:VOLTAGE");
             //label2.setBackground(Color.CYAN);
             label2.rectangle.label.setFonttype(Font.BOLD);
@@ -1780,20 +1730,36 @@ public class MainFrame extends javax.swing.JFrame {
             label3.rectangle.label.setFonttype(Font.BOLD);
             label3.rectangle.label.setfontSize(12);
             label3.setOutlined(false);
-            label3.setToolTipText("RANGE: 0V to 6.5V");
+            label3.setToolTipText("RANGE: -8.5V to -5.5V");
+            MultiLineText label4 = new MultiLineText("WARM UP:TIME");
+            //label3.setBackground(Color.CYAN);
+            label4.rectangle.label.setFonttype(Font.BOLD);
+            label4.rectangle.label.setfontSize(12);
+            label4.setOutlined(false);
+            label4.setToolTipText("RANGE: 0 to 180 SEC");
             XMLReadWrite reader = new XMLReadWrite("conf.xml");
-            CVtext = new JTextField(reader.getTextByTag("CathodeVoltage"));
+            String text1 = reader.getTextByTag("CathodeVoltage");
+            CVtext = new JTextField(text1);
             CVtext.addKeyListener(enterListener2);
             CVtext.setEditable(false);
             PSpace sp1 = new PSpace(CVtext, 0, 0.1, 0, 0.1);
-            BVtext = new JTextField(reader.getTextByTag("GridVoltage"));
+            String text2 = reader.getTextByTag("GridVoltage");
+            BVtext = new JTextField(text2);
             BVtext.addKeyListener(enterListener2);
             BVtext.setEditable(false);
             PSpace sp2 = new PSpace(BVtext, 0, 0.1, 0, 0.1);
-            FVtext = new JTextField(reader.getTextByTag("FilamentVoltage"));
+            String text3= reader.getTextByTag("FilamentVoltage");
+            FVtext = new JTextField(text3);
             FVtext.addKeyListener(enterListener2);
             FVtext.setEditable(false);
             PSpace sp3 = new PSpace(FVtext, 0, 0.1, 0, 0.1);
+            warmUPTimeText = new JTextField("180");
+            warmUPTimeText.addKeyListener(enterListener2);
+            FV = Double.parseDouble(text3);
+            BV = Double.parseDouble(text2);
+            CV = Double.parseDouble(text1);
+            
+            PSpace sp4 = new PSpace(warmUPTimeText, 0, 0.1, 0, 0.1);
             GridBagConstraints gridBagConstraints = new java.awt.GridBagConstraints();
             gridBagConstraints.fill = GridBagConstraints.BOTH;
             gridBagConstraints.weightx = 0.25;
@@ -1807,10 +1773,15 @@ public class MainFrame extends javax.swing.JFrame {
             p12.add(label2, gridBagConstraints);
             gridBagConstraints.gridx = 3;
             p12.add(sp2, gridBagConstraints);
-            gridBagConstraints.gridx = 4;
+            gridBagConstraints.gridx = 0;
+            gridBagConstraints.gridy = 1;
             p12.add(label3, gridBagConstraints);
-            gridBagConstraints.gridx = 5;
+            gridBagConstraints.gridx = 1;
             p12.add(sp3, gridBagConstraints);
+            gridBagConstraints.gridx = 2;
+            p12.add(label4, gridBagConstraints);
+            gridBagConstraints.gridx = 3;
+            p12.add(sp4, gridBagConstraints);
         }
         JPanel p13;
         {
@@ -1980,6 +1951,7 @@ public class MainFrame extends javax.swing.JFrame {
                         analogctrlframe.cathodeVoltage.setValueWithDecimal(CV);
                         analogctrlframe.beamOnVoltage.setValueWithDecimal(BV);
                         analogctrlframe.filamentVoltage.setValueWithDecimal(FV);
+                        analogctrlframe.warmUpTimer.setValue(warmUPTime);
                         senseFrame.loadFromFile("senseElParams.xml");
                         if (chk2.isSelected()) {
                             if (verification1()) {
@@ -2019,19 +1991,18 @@ public class MainFrame extends javax.swing.JFrame {
                         senseFrame.baudWidth.setValueWithDecimal(bw);
                         pgroup.setVisible(false);
                         byte[] packetM = analogctrlframe.getPacket();
-                        for (int i = 0; i < 12; i++) {
+                        for (int i = 0; i < 15; i++) {
                             String text = getString(packetM, 2 * i) + " " + getString(packetM, 2 * i + 1);
                             displayFrame.sdisp[i].setText(text);
                         }
-                        for (int i = 12; i < 15; i++) {
-                            displayFrame.sdisp[i].setText("");
-                        }
+
                         for (int i = 0; i < 20; i++) {
                             try {
                                 Thread.sleep(50);
                             } catch (InterruptedException ex) {
                                 Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
                             }
+                            System.out.println(analogctrlframe.warmUpTimer.getValueAsString());
                             sendtoModulator(packetM);
                         }
 
@@ -2117,7 +2088,7 @@ public class MainFrame extends javax.swing.JFrame {
             public void actionPerformed(ActionEvent e) {
                 autoONinprogress = false;
                 autoONTimer.stop();
-                autoOFFinprogress = false;
+                //autoOFFinprogress = false;
                 autoOFFTimer.stop();
                 manual.setBackground(Color.green);
                 autoON.setBackground(Color.RED);
@@ -2137,7 +2108,7 @@ public class MainFrame extends javax.swing.JFrame {
                 if (autoONinprogress) {
                     JOptionPane.showMessageDialog(autoON, "Auto ON already in progress");
                 } else {
-                    startAutoON();
+                    //startAutoON();
                 }
             }
         });
@@ -2301,11 +2272,17 @@ public class MainFrame extends javax.swing.JFrame {
         resetListener = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                sendReset(Status.ON);
-                if (e != null) {
-                    intReset.setBackground(Color.GREEN);
+
+                if (e.getSource() == intStat2.intReset) {
+                    VSWRinterlockset = false;
+                    intStat2.setStatus(6, Status.FINE, "OK");
+                } else {
+                    sendReset(Status.ON);
+                    if (e != null) {
+                        intReset.setBackground(Color.GREEN);
+                    }
+                    intResetTimer.restart();
                 }
-                intResetTimer.restart();
             }
         };
         intReset.addActionListener(resetListener);
@@ -2605,9 +2582,6 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JMenuItem jMenuItem10;
-    private javax.swing.JMenuItem jMenuItem11;
-    private javax.swing.JMenuItem jMenuItem12;
-    private javax.swing.JMenuItem jMenuItem13;
     private javax.swing.JMenuItem jMenuItem14;
     private javax.swing.JMenuItem jMenuItem15;
     private javax.swing.JMenuItem jMenuItem2;
@@ -3006,14 +2980,17 @@ public class MainFrame extends javax.swing.JFrame {
     }
 
     private boolean verification2() {
-        boolean verify1 = verify(CVtext, -17, -15);
+        boolean verify1 = verify(CVtext, -18, -15);
         boolean verify2 = verify(BVtext, -60, 0);
-        boolean verify3 = verify(FVtext, 0, 6.5);
-        if (verify1 && verify2 && verify3) {
+        boolean verify3 = verify(FVtext, -8.5, -5.5);
+        boolean verify4 = verify(warmUPTimeText, 0, 180);
+        boolean result = verify1 && verify2 && verify3 && verify4;
+        if (result) {
             XMLReadWrite writer = new XMLReadWrite("conf.xml");
             String text1 = CVtext.getText();
             String text2 = BVtext.getText();
             String text3 = FVtext.getText();
+            String text4 = warmUPTimeText.getText();
             if (!text1.equals("")) {
                 CV = Double.parseDouble(text1);
                 writer.Write("CathodeVoltage", text1);
@@ -3022,9 +2999,12 @@ public class MainFrame extends javax.swing.JFrame {
                 BV = Double.parseDouble(text2);
                 writer.Write("GridVoltage", text2);
             }
-            if (!text2.equals("")) {
+            if (!text3.equals("")) {
                 FV = Double.parseDouble(text3);
                 writer.Write("FilamentVoltage", text3);
+            }
+            if (!text4.equals("")) {
+                warmUPTime = (int) Double.parseDouble(text4);
             }
             writer.printToFile();
 //            if (!text1.equals("") && !text2.equals("")) {
@@ -3033,7 +3013,7 @@ public class MainFrame extends javax.swing.JFrame {
 //                }
 //            }
         }
-        return verify1 && verify2 && verify3;
+        return result;
     }
 
     private boolean btnPressed(int index, int flag) {
@@ -3101,13 +3081,13 @@ public class MainFrame extends javax.swing.JFrame {
         }
 
         byte[] packetM = digitalctrlframe.getPacket();
-        for (int i = 0; i < 7; i++) {
+        for (int i = 0; i < 15; i++) {
             String text = getString(packetM, 2 * i) + " " + getString(packetM, 2 * i + 1);
             displayFrame.sdisp[i].setText(text);
         }
-        for (int i = 7; i < 15; i++) {
-            displayFrame.sdisp[i].setText("");
-        }
+//        for (int i = 7; i < 15; i++) {
+//            displayFrame.sdisp[i].setText("");
+//        }
         boolean result = false;
         for (int i = 0; i < 10; i++) {
             try {
@@ -3124,271 +3104,294 @@ public class MainFrame extends javax.swing.JFrame {
     }
 
     private void setMonitoringStatus(byte[] buf) {
-        int code = statheader.commandcode.getValue();
-        int expectedLength = statheader.noOfDataBytes.getValue() + 9;
-        switch (code) {
-            case Status.ANALOG:
-                analogstat.setArr(buf);
-                String text;
-                for (int i = 0; i < 6; i++) {
-                    if (i == 1 && digitalInputstat.getHVStatus() == Status.OFF) {
-                        text = String.format("%.1f", 0.0d);
 
-                    } else if (i == 4 && digitalInputstat.getMainsStatus() == Status.ON && digitalInputstat.getModulatorStatus() == Status.OFF) {
-                        SH.A2D helixcurrent = (SH.A2D) (analogstat.fields.get(i));
-                        double val = ((65536 - helixcurrent.getValue()) / (helixcurrent.factor)) - helixcurrent.shift;
-                        text = String.format("%.1f", val);
+        analogstat.setArr(buf);
+        String text;
+        for (int i = 0; i < 6; i++) {
+            if (i == 1 && digitalInputstat.getHVStatus() == Status.OFF) {
+                text = String.format("%.1f", 0.0d);
 
-                    } else if (i == 5) {
-                        if (digitalInputstat.getHVStatus() == Status.OFF) {
-                            text = String.format("%.1f", 0.0d);
-                        } else {
-                            double catv = Double.parseDouble(analogstat.cathodeVoltage.getValueAsString());
-                            double colv = Double.parseDouble(analogstat.collectorCurrent.getValueAsString());
-                            text = String.format("%.1f", catv + colv);
+            } else if (i == 4 && digitalInputstat.getMainsStatus() == Status.ON && digitalInputstat.getModulatorStatus() == Status.OFF) {
+                text = String.format("%.1f", 0.0);
+
+            } else if (i == 5) {
+                if (digitalInputstat.getHVStatus() == Status.OFF) {
+                    text = String.format("%.1f", 0.0d);
+                } else {
+                    double catv = Double.parseDouble(analogstat.cathodeCurrent.getValueAsString());
+//                    double colv = Double.parseDouble(analogstat.collectorCurrent.getValueAsString());
+                    text = String.format("%.1f", catv);
+                }
+
+            } else {
+                text = analogstat.fields.get(modFieldMap[i]).getValueAsString();
+            }
+
+            analogMonitoring.setValue(0, i, text);
+            if (i == 0) {
+                p3results[8].setText(text);
+            }
+            if (i == 1) {
+                p3results[6].setText(text);
+            }
+            if (i == 2) {
+                p3results[7].setText(text);
+            }
+            if (i == 3) {
+                p3results[5].setText(text);
+            }
+
+        }
+
+//        Log.addtoLog(analogstat);
+        //intrlock generation
+        double fv = ((SH.A2D) analogstat.filamentVoltage).getValueWithDecimal();
+        double cv = ((SH.A2D) analogstat.cathodeVoltage).getValueWithDecimal();
+        double bv = ((SH.A2D) analogstat.beamOnVoltage).getValueWithDecimal();
+        double fvdev = fv - FV;
+        double cvdev = cv - CV;
+        double bvdev = bv - BV;
+        if (currentStage >= MAINS) {
+            if (!checkDelayTimer.isRunning()) {
+                if (!intByp3.chks[1].isSelected()) {
+                    if ((fvdev < -FVLimit) || (fvdev > FVLimit)) {
+                        FVfaultCount++;
+                        if (FVfaultCount == 5) {
+                            //System.out.println(fvdev);
+                            intStat1.setStatus(7, Status.ERROR, "NOT OK");
+                            //btnPressed(0, Command.OFF);
+                            FVfaultCount = 0;
                         }
-
                     } else {
-                        text = analogstat.fields.get(i).getValueAsString();
+                        FVfaultCount = 0;
+                        intStat1.setStatus(7, Status.FINE, "OK");
                     }
+                }
+            }
+        }
+        if (currentStage >= HV) {
+            if (!checkDelayTimer.isRunning()) {
+                if (!intByp3.chks[2].isSelected()) {
+                    if ((cvdev < -CVLimit) || (cvdev > CVLimit)) {
+                        CVfaultCount++;
+                        if (CVfaultCount == 5) {
+                            System.out.println(cvdev);
+                            intStat1.setStatus(8, Status.ERROR, "NOT OK");
+                            btnPressed(1, Command.OFF);
+                            CVfaultCount = 0;
+                        }
+                    } else {
+                        CVfaultCount = 0;
+                        intStat1.setStatus(8, Status.FINE, "OK");
+                    }
+                }
+            }
+        }
+        if (currentStage >= MOD) {
+            if (!checkDelayTimer.isRunning()) {
+                if (!intByp3.chks[3].isSelected()) {
+                    if ((bvdev < -BVLimit) || (bvdev > BVLimit)) {
+                        BVfaultCount++;
+                        if (BVfaultCount == 5) {
+                            System.out.println(bvdev);
+                            intStat1.setStatus(9, Status.ERROR, "NOT OK");
+                            btnPressed(2, Command.OFF);
+                            BVfaultCount = 0;
+                        }
+                    } else {
+                        BVfaultCount = 0;
+                        intStat1.setStatus(9, Status.FINE, "OK");
+                    }
+                }
+            }
+        }
 
-                    analogMonitoring.setValue(0, i, text);
-                    if (i == 0) {
-                        p3results[8].setText(text);
-                    }
+        digitalInputstat.setArr(buf);
+        int overallstat = digitalInputstat.getStatus();
+        if ((overallstat == Status.ERROR) && (digitalInputstat.getMainsStatus() == Status.ON)) {
+            interlockMsg.setFaultDetail(digitalInputstat.fields.get(13).getText());
+            interlockMsg.setAlert(true);
+
+        } else {
+            interlockMsg.setAlert(false);
+        }
+
+        for (int i = 0; i < 7; i++) {
+            int status = digitalInputstat.fields.get(map1[i]).getStatus();
+            String txt = digitalInputstat.fields.get(map1[i]).getText();
+            intStat1.setStatus(i, status, txt);
+        }
+        int v = digitalInputstat.remote_local.getValue();
+        bd.setStatus(TxComps.LOCAL_REMOTE, (v == 1) ? Status.FINE : Status.ERROR);
+        v = digitalInputstat.extmodpulse.getValue();
+        intSelected = v == 0;
+        extSelected = v == 1;
+        if (intSelected) {
+            if (intChk) {
+                p1btns[0].setBackground(Color.GREEN);
+                p1btns[0].label.setColor(Color.BLACK);
+                p1btns[1].setBackground(Color.RED);
+                p1btns[1].label.setColor(Color.WHITE);
+                intChk = false;
+                extChk = true;
+            }
+
+        } else {//ext selected
+            if (extChk) {
+                p1btns[1].setBackground(Color.GREEN);
+                p1btns[1].label.setColor(Color.BLACK);
+                p1btns[0].setBackground(Color.RED);
+                p1btns[0].label.setColor(Color.WHITE);
+                intChk = true;
+                extChk = false;
+            }
+        }
+        
+        int value = digitalInputstat.FAULT_STATUS.getValue();
+        if(value!=0){
+            digitalInputstat.FAULT_STATUS.getValue();
+        }
+        System.out.println(value);
+        int[] bits = getbits(buf[9]);
+        for (int i = 0; i < 3; i++) {
+            int val = digitalInputstat.fields.get(i + 1).getValue();
+            if (i == 0) {
+                val = val - 1;
+            }
+            if (val == 1) {
+                if (OnOffstat[i] == Status.OFF) {
+                    OnOffstat[i] = Status.ON;
                     if (i == 1) {
-                        p3results[6].setText(text);
+                        mainsONTimer.stop();
                     }
-                    if (i == 2) {
-                        p3results[7].setText(text);
-                    }
-                    if (i == 3) {
-                        p3results[5].setText(text);
-                    }
-
-                }
-
-                Log.addtoLog(analogstat);
-                //intrlock generation
-                double fv = ((SH.A2D) analogstat.filamentVoltage).getValueWithDecimal();
-                double cv = ((SH.A2D) analogstat.cathodeVoltage).getValueWithDecimal();
-                double bv = ((SH.A2D) analogstat.beamOnVoltage).getValueWithDecimal();
-                double fvdev = fv + FV;
-                double cvdev = cv - CV;
-                double bvdev = bv - BV;
-                if (currentStage >= MAINS) {
-                    if (!checkDelayTimer.isRunning()) {
-                        if (!intByp3.chks[1].isSelected()) {
-                            if ((fvdev < -FVLimit) || (fvdev > FVLimit)) {
-                                FVfaultCount++;
-                                if (FVfaultCount == 5) {
-                                    //System.out.println(fvdev);
-                                    intStat1.setStatus(7, Status.ERROR, "NOT OK");
-                                    //btnPressed(0, Command.OFF);
-                                    FVfaultCount = 0;
-                                }
-                            } else {
-                                FVfaultCount = 0;
-                                intStat1.setStatus(7, Status.FINE, "OK");
-                            }
+                    if (autoONinprogress) {
+                        autoONHandler(i);
+                        if (i == 2) {
+                            autoONinprogress = false;
+                            manual.setBackground(Color.GREEN);
+                            autoON.setBackground(Color.red);
                         }
                     }
                 }
-                if (currentStage >= HV) {
-                    if (!checkDelayTimer.isRunning()) {
-                        if (!intByp3.chks[2].isSelected()) {
-                            if ((cvdev < -CVLimit) || (cvdev > CVLimit)) {
-                                CVfaultCount++;
-                                if (CVfaultCount == 5) {
-                                    System.out.println(cvdev);
-                                    intStat1.setStatus(8, Status.ERROR, "NOT OK");
-                                    btnPressed(1, Command.OFF);
-                                    CVfaultCount = 0;
-                                }
-                            } else {
-                                CVfaultCount = 0;
-                                intStat1.setStatus(8, Status.FINE, "OK");
-                            }
-                        }
-                    }
-                }
-                if (currentStage >= MOD) {
-                    if (!checkDelayTimer.isRunning()) {
-                        if (!intByp3.chks[3].isSelected()) {
-                            if ((bvdev < -BVLimit) || (bvdev > BVLimit)) {
-                                BVfaultCount++;
-                                if (BVfaultCount == 5) {
-                                    System.out.println(bvdev);
-                                    intStat1.setStatus(9, Status.ERROR, "NOT OK");
-                                    btnPressed(2, Command.OFF);
-                                    BVfaultCount = 0;
-                                }
-                            } else {
-                                BVfaultCount = 0;
-                                intStat1.setStatus(9, Status.FINE, "OK");
-                            }
-                        }
-                    }
-                }
-                break;
-            case Status.DIGITALINPUT:
-                digitalInputstat.setArr(buf);
-                int overallstat = digitalInputstat.getStatus();
-                if ((overallstat == Status.ERROR) && (digitalInputstat.getMainsStatus() == Status.ON)) {
-
-                    interlockMsg.setAlert(true);
-
-                } else {
-                    interlockMsg.setAlert(false);
-                }
-
-                for (int i = 0; i < 7; i++) {
-                    int status = digitalInputstat.fields.get(map1[i]).getStatus();
-                    String txt = digitalInputstat.fields.get(map1[i]).getText();
-                    intStat1.setStatus(i, status, txt);
-                }
-                int v = digitalInputstat.remote_local.getValue();
-                bd.setStatus(TxComps.LOCAL_REMOTE, (v == 1) ? Status.FINE : Status.ERROR);
-                v = digitalInputstat.extmodpulse.getValue();
-                p1btns[0].setBackground((v == 0) ? Color.RED : Color.GREEN);
-                p1btns[0].label.setColor((v == 0) ? Color.WHITE : Color.BLACK);
-                p1btns[1].setBackground((v == 1) ? Color.RED : Color.GREEN);
-                p1btns[1].label.setColor((v == 1) ? Color.WHITE : Color.BLACK);
-                int[] bits = getbits(buf[9]);
-                for (int i = 0; i < 3; i++) {
-                    if (digitalInputstat.fields.get(i).getValue() == 1) {
-                        if (OnOffstat[i] == Status.OFF) {
-                            OnOffstat[i] = Status.ON;
-                            if (i == 1) {
-                                mainsONTimer.stop();
-                            }
-                            if (autoONinprogress) {
-                                autoONHandler(i);
-                                if (i == 2) {
-                                    autoONinprogress = false;
-                                    manual.setBackground(Color.GREEN);
-                                    autoON.setBackground(Color.red);
-                                }
-                            }
-                        }
-                        if (onclicked[i] = true) {
-                            onclicked[i] = false;
+                if (onclicked[i] = true) {
+                    onclicked[i] = false;
 //                    
+                }
+                ons[i].setBackground(Color.GREEN);
+                ons[i].setForeground(Color.BLACK);
+                offs[i].setBackground(Color.RED);
+                offs[i].setForeground(Color.WHITE);
+            } else {
+                if (OnOffstat[i] == Status.ON) {
+                    OnOffstat[i] = Status.OFF;
+                    System.out.println("OFF i =" + i + "autoOFFinprogress=" + autoOFFinprogress);
+                    if (i == 0) {
+                        mainsONTimer.stop();
+                    }
+                    if (autoOFFinprogress) {
+                        System.out.println("i =" + i);
+                        if (i <= 1) {
+                            autoOFFinprogress = false;
+                            manual.setBackground(Color.GREEN);
+                            autoOFF.setBackground(Color.red);
+                        } else {
+                            autoOFFHandler(i);
                         }
-                        ons[i].setBackground(Color.GREEN);
-                        ons[i].setForeground(Color.BLACK);
-                        offs[i].setBackground(Color.RED);
-                        offs[i].setForeground(Color.WHITE);
-                    } else {
-                        if (OnOffstat[i] == Status.ON) {
-                            OnOffstat[i] = Status.OFF;
-                            if (i == 0) {
-                                mainsONTimer.stop();
-                            }
-                            if (autoOFFinprogress) {
-                                autoOFFHandler(i);
-                                if (i == 0) {
-                                    autoOFFinprogress = false;
-                                    manual.setBackground(Color.GREEN);
-                                    autoOFF.setBackground(Color.red);
-                                }
-                            }
-                        }
-
-                        offclicked[i] = false;
-                        ons[i].setBackground(Color.RED);
-                        ons[i].setForeground(Color.WHITE);
-                        offs[i].setBackground(Color.GREEN);
-                        offs[i].setForeground(Color.BLACK);
                     }
                 }
-                boolean flag1 = bits[1] == 0;
-                CVtext.setEnabled(flag1);
-                BVtext.setEnabled(flag1);
-                FVtext.setEnabled(flag1);
-                if (digitalInputstat.getModulatorStatus() == Status.ON) {
-                    flowStatus.setStatus(TxComps.MODULATION, Status.FINE);
-                    bd.setStatus(TxComps.MODULATION, Status.FINE);
-                    txStatus.setStatus(0, 8, Status.FINE);
-                } else {
-                    flowStatus.setStatus(TxComps.MODULATION, Status.ERROR);
-                    bd.setStatus(TxComps.MODULATION, Status.ERROR);
-                    txStatus.setStatus(0, 8, Status.ERROR);
-                }
-                if (digitalInputstat.getHVStatus() == Status.ON) {
-                    flowStatus.setStatus(TxComps.HV, Status.FINE);
-                    bd.setStatus(TxComps.HV, Status.FINE);
-                    txStatus.setStatus(0, 7, Status.FINE);
-                } else {
-                    flowStatus.setStatus(TxComps.HV, Status.ERROR);
-                    bd.setStatus(TxComps.HV, Status.ERROR);
-                    txStatus.setStatus(0, 7, Status.ERROR);
-                }
-                if (digitalInputstat.getMainsStatus() == Status.ON) {
-                    boolean isready = digitalInputstat.ready.getValue() == 1;
-                    interlockMsg.setDelayNotification(!isready);
-                    flowStatus.setStatus(TxComps.MODULATOR_MAINS, Status.FINE);
-                    bd.setStatus(TxComps.MODULATOR_MAINS, Status.FINE);
-                    txStatus.setStatus(0, 6, Status.FINE);
+
+                offclicked[i] = false;
+                ons[i].setBackground(Color.RED);
+                ons[i].setForeground(Color.WHITE);
+                offs[i].setBackground(Color.GREEN);
+                offs[i].setForeground(Color.BLACK);
+            }
+        }
+        boolean flag1 = bits[1] == 0;
+        CVtext.setEnabled(flag1);
+        BVtext.setEnabled(flag1);
+        FVtext.setEnabled(flag1);
+        if (digitalInputstat.getModulatorStatus() == Status.ON) {
+            flowStatus.setStatus(TxComps.MODULATION, Status.FINE);
+            bd.setStatus(TxComps.MODULATION, Status.FINE);
+            txStatus.setStatus(0, 8, Status.FINE);
+        } else {
+            flowStatus.setStatus(TxComps.MODULATION, Status.ERROR);
+            bd.setStatus(TxComps.MODULATION, Status.ERROR);
+            txStatus.setStatus(0, 8, Status.ERROR);
+        }
+        if (digitalInputstat.getHVStatus() == Status.ON) {
+            flowStatus.setStatus(TxComps.HV, Status.FINE);
+            bd.setStatus(TxComps.HV, Status.FINE);
+            txStatus.setStatus(0, 7, Status.FINE);
+        } else {
+            flowStatus.setStatus(TxComps.HV, Status.ERROR);
+            bd.setStatus(TxComps.HV, Status.ERROR);
+            txStatus.setStatus(0, 7, Status.ERROR);
+        }
+        if (digitalInputstat.getMainsStatus() == Status.ON) {
+            boolean isready = digitalInputstat.ready.getValue() == 1;
+            interlockMsg.setDelayNotification(!isready);
+            flowStatus.setStatus(TxComps.MODULATOR_MAINS, Status.FINE);
+            bd.setStatus(TxComps.MODULATOR_MAINS, Status.FINE);
+            txStatus.setStatus(0, 6, Status.FINE);
 //                    wdgTimer.restart();
 //                    //Local/remote
 //                    p1btns[0].setBackground(Color.RED);
 //                    p1btns[1].setBackground(Color.GREEN);
-                } else {
-                    interlockMsg.setDelayNotification(false);
-                    flowStatus.setStatus(TxComps.MODULATOR_MAINS, Status.ERROR);
-                    bd.setStatus(TxComps.MODULATOR_MAINS, Status.ERROR);
+        } else {
+            interlockMsg.setDelayNotification(false);
+            flowStatus.setStatus(TxComps.MODULATOR_MAINS, Status.ERROR);
+            bd.setStatus(TxComps.MODULATOR_MAINS, Status.ERROR);
 
-                    txStatus.setStatus(0, 6, Status.ERROR);
+            txStatus.setStatus(0, 6, Status.ERROR);
 //                    wdgTimer.stop();
 
-                }
+        }
 
-                boolean flag2 = bits[2] == 0;
+        boolean flag2 = bits[2] == 0;
 
-                for (int i = 0; i < prfbtns.length; i++) {
-                    prfbtns[i].setEnabled(chk1.isSelected() && flag2);
-                    pwbtns[i].setEnabled(chk1.isSelected() && flag2);
-                }
-                prfchoose.setEnabled(chk2.isSelected() && flag2);
-                pwchoose.setEnabled(chk2.isSelected() && flag2);
+        for (int i = 0; i < prfbtns.length; i++) {
+            prfbtns[i].setEnabled(chk1.isSelected() && flag2);
+            pwbtns[i].setEnabled(chk1.isSelected() && flag2);
+        }
+        prfchoose.setEnabled(chk2.isSelected() && flag2);
+        pwchoose.setEnabled(chk2.isSelected() && flag2);
 
-                for (int i = 0; i < 4; i++) {
-                    p1btns[i].setEnabled(flag2);
-                }
+        for (int i = 0; i < 4; i++) {
+            p1btns[i].setEnabled(flag2);
+        }
 
-                boolean flag3 = (digitalInputstat.getMainsStatus() != Status.OFF);
-                //autoOFF.setEnabled(flag3);
+        boolean flag3 = (digitalInputstat.getMainsStatus() != Status.OFF);
+        //autoOFF.setEnabled(flag3);
 
-                boolean flag4 = (digitalInputstat.getModulatorStatus() != Status.ON);
-                //autoON.setEnabled(flag4);
-                Log.addtoLog(digitalInputstat);
-                //assigning current stage
-                if (digitalInputstat.getModulatorStatus() == Status.ON) {
-                    if (currentStage != MOD) {
-                        currentStage = MOD;
-                        checkDelayTimer.setInitialDelay(30000);
-                        checkDelayTimer.restart();
-                    }
-                } else if (digitalInputstat.getHVStatus() == Status.ON) {
-                    if (currentStage != HV) {
-                        currentStage = HV;
-                        checkDelayTimer.setInitialDelay(30000);
-                        checkDelayTimer.restart();
-                    }
-                } else if (digitalInputstat.getMainsStatus() == Status.ON) {
-                    if (currentStage != MAINS) {
-                        currentStage = MAINS;
-                        checkDelayTimer.setInitialDelay(30000);
-                        checkDelayTimer.restart();
-                    }
-                } else {
-                    currentStage = -1;
-                }
-                break;
-            case Status.DIGITALOUTPUT:
-                digitalOutputstat.setArr(buf);
-            //panel p2
+        boolean flag4 = (digitalInputstat.getModulatorStatus() != Status.ON);
+        //autoON.setEnabled(flag4);
+//        Log.addtoLog(digitalInputstat);
+        //assigning current stage
+        if (digitalInputstat.getModulatorStatus() == Status.ON) {
+            if (currentStage != MOD) {
+                currentStage = MOD;
+                checkDelayTimer.setInitialDelay(30000);
+                checkDelayTimer.restart();
+            }
+        } else if (digitalInputstat.getHVStatus() == Status.ON) {
+            if (currentStage != HV) {
+                currentStage = HV;
+                checkDelayTimer.setInitialDelay(30000);
+                checkDelayTimer.restart();
+            }
+        } else if (digitalInputstat.getMainsStatus() == Status.ON) {
+            if (currentStage != MAINS) {
+                currentStage = MAINS;
+                checkDelayTimer.setInitialDelay(30000);
+                checkDelayTimer.restart();
+            }
+        } else {
+            currentStage = -1;
+        }
+
+        //panel p2
 //                int[] bits = getbits(buf[9]);
 //                for (int i = 0; i < 3; i++) {
 //                    if (digitalOutputstat.fields.get(4 - i).getValue() == 1) {
@@ -3478,21 +3481,18 @@ public class MainFrame extends javax.swing.JFrame {
 //
 //                boolean flag4 = (digitalOutputstat.getModulatorStatus() != Status.ON);
 //                autoON.setEnabled(flag4);
-        }
-
 //        //temporary
-//        if (code == Status.DIGITALINPUT) {
-//            for (int i = 0; i < expectedLength / 2; i++) {
-//                String text = getString(bufM, 2 * i) + " " + getString(bufM, 2 * i + 1);
-//                displayFrame.rdisp[i].setText(text);
-//            }
+        for (int i = 0; i < 15; i++) {
+            String text1 = getString(bufM, 2 * i + 9) + " " + getString(bufM, 2 * i + 1 + 9);
+            displayFrame.rdisp[i].setText(text1);
+        }
 //            for (int i = expectedLength / 2 + 1; i < 15; i++) {
 //                displayFrame.rdisp[i].setText("");
 //            }
-//        }
     }
 
     private void setSensorMonitoringStatus(byte[] buf) {
+
         senseStatus.setArr(buf);
         senseStatus.getStatus();
         for (int i = 0; i < 15; i++) {
@@ -3502,8 +3502,9 @@ public class MainFrame extends javax.swing.JFrame {
         for (int i = 15; i < 15; i++) {
             displayFrame.rdisp[i].setText("");
         }
+        double fwdPwr = 0, revPwr;
         for (int i = 0; i < 5; i++) {
-            double fwdPwr = 0, revPwr;
+
             String str;
             if (i < 4) {
                 int valx = senseStatus.fields.get(i).getValue();
@@ -3515,12 +3516,19 @@ public class MainFrame extends javax.swing.JFrame {
                 if (i == 2) {
                     revPwr = valy;
 
-                    double retLoss = fwdPwr-revPwr;
+                    double retLoss = fwdPwr - revPwr;
                     double r = Math.exp(0.115 * retLoss);
                     double vswr = (r + 1) / (r - 1);
-                    if (vswr > VSWRLIMIT) {
+                    if (vswr >= VSWRLIMIT && fwdPwr > 40) {
+                        //System.out.println("VSWR limit reached");
+                        VSWRinterlockset = true;
+                        intStat2.setStatus(6, Status.ERROR, "NOT OK");
                         stopMTSG(null);
+                        if (!autoOFFinprogress) {
+                            startAutoOFF();
+                        }
                     }
+
                     str = String.format("%.1f", retLoss);
                 } else {
                     str = String.format("%.1f", valy);
@@ -3530,6 +3538,7 @@ public class MainFrame extends javax.swing.JFrame {
             }
             analogMonitoring.setValue(1, i, str);
         }
+
         for (int i = 0; i < 4; i++) {
             int status = senseStatus.fields.get(map2[i]).getStatus();
             String text = senseStatus.fields.get(map2[i]).getText();
@@ -3541,17 +3550,16 @@ public class MainFrame extends javax.swing.JFrame {
         p3setstatus(2, senseStatus.BLIL.getStatus(), senseStatus.BLIL.getText());
         int value = senseStatus.pressure.getValue();
 
-        int wgpressure = Status.FINE;
-        String wgpressuretext = "OK";
-        if (value > 34) {
-            wgpressure = Status.ERROR;
-            wgpressuretext = "HIGH";
-        }
-        if (value < 10) {
-            wgpressure = Status.ERROR;
-            wgpressuretext = "LOW";
-        }
+        int wgpressure = senseStatus.press_il.getStatus();
+        String wgpressuretext = senseStatus.press_il.getText();
         intStat2.setStatus(4, wgpressure, String.valueOf(value));
+        for (int i = 5; i < 9; i++) {
+            int status = senseStatus.fields.get(map2[i]).getStatus();
+            String text = senseStatus.fields.get(map2[i]).getText();
+            if (i != 6) {
+                intStat2.setStatus(i, status, text);
+            }
+        }
         p3setstatus(3, wgpressure, wgpressuretext);
         //p3setstatus(4, wgpressurelow, wgpressurelowtext);
         p3setstatus(4, senseStatus.CTIL.getStatus(), senseStatus.CTIL.getText());
@@ -3590,6 +3598,8 @@ public class MainFrame extends javax.swing.JFrame {
             if (verification2()) {
                 analogctrlframe.cathodeVoltage.setValueWithDecimal(CV);
                 analogctrlframe.beamOnVoltage.setValueWithDecimal(BV);
+                analogctrlframe.filamentVoltage.setValueWithDecimal(FV);
+                analogctrlframe.warmUpTimer.setValue(warmUPTime);
                 result = true;
             } else {
                 JOptionPane.showMessageDialog(ons[0], "voltage setting NOT OK");
@@ -3665,7 +3675,7 @@ public class MainFrame extends javax.swing.JFrame {
 
     private void reset() {
 //        this.setMonitoringStatus(new byte[30]);
-        analogstat.setArr(new byte[30]);
+        analogstat.setArr(new byte[49]);
         //analogMonitoring.setValue(0, 0, statframe.PRF.getValueAsString());
         //analogMonitoring.setValue(0, 1, statframe.pw.getValueAsString());
         //analogMonitoring.setValue(0, 2, statframe.filamentVoltage.getValueAsString());
@@ -3690,11 +3700,13 @@ public class MainFrame extends javax.swing.JFrame {
             autoON.setBackground(Color.RED);
             manual.setBackground(Color.GREEN);
         }
-        if (btnPressed(index, Command.OFF)) {
+        if (index >= 1) {
             autoOFFinprogress = true;
-            autoOFF.setBackground(Color.green);
-            autoON.setBackground(Color.RED);
-            manual.setBackground(Color.RED);
+            if (btnPressed(index, Command.OFF)) {
+                autoOFF.setBackground(Color.green);
+                autoON.setBackground(Color.RED);
+                manual.setBackground(Color.RED);
+            }
         }
     }
 
@@ -3756,8 +3768,9 @@ public class MainFrame extends javax.swing.JFrame {
     private void autoOFFHandler(int i) {
         if (i > 0) {
             autobtnindex = i - 1;
+            System.out.println("stage" + autobtnindex);
             autoOFFTimer.setInitialDelay(autoOFFdelays[autobtnindex]);
-            autoOFFTimer.start();
+            autoOFFTimer.restart();
         }
     }
 
@@ -3786,33 +3799,37 @@ public class MainFrame extends javax.swing.JFrame {
             new Thread() {
                 @Override
                 public void run() {
-                    int offset = 0, readcnt, expectedLength = 0;
+
                     try {
                         while (true) {
-                            while (true) {
 
-                                int available = inputM.available();
-                                if (available == 0) {
-                                    Thread.sleep(1);
+                            while (true) {// match txID byte0 & 1 and protocol ID byte 2&3
+                                byte byte0 = inputM.readByte();
+                                if (byte0 != 1) {
                                     continue;
                                 }
-                                readcnt = inputM.read(bufM);//, offset, bufM.length - offset);
-                                offset += readcnt;
-                                if (offset >= 9) {//
-                                    statheader.setArr(bufM);
-                                    expectedLength = (int) statheader.noOfDataBytes.getValue() + 9;
-                                    if (offset >= expectedLength) {
-                                        offset -= expectedLength;
-//                                        if (offset != 0) {
-//                                            System.out.println("offset = " + offset);
-//                                        }
-                                        break;
-                                    }
+                                byte byte1 = inputM.readByte();
+                                if (byte1 != 10) {
+                                    continue;
                                 }
-
+                                byte byte2 = inputM.readByte();
+                                if (byte2 != 0) {
+                                    continue;
+                                }
+                                byte byte3 = inputM.readByte();
+                                if (byte3 == 0) {
+                                    break;
+                                }
                             }
 
-                            setMonitoringStatus(bufM);
+                            inputM.readFully(bufM, 4, 5);
+                            int code = bufM[7];//command code
+                            if (code == 3) {//status packet
+                                inputM.readFully(bufM, 9, 40);
+                                setMonitoringStatus(bufM);
+                            } else if (code == 16) {//control packet acknowledgement
+                                inputM.readFully(bufM, 9, 4);
+                            }
                         }
 
                     } catch (IOException ex) {
@@ -3820,8 +3837,6 @@ public class MainFrame extends javax.swing.JFrame {
                         modConn.setText("NOT CONNECTED TO MODULATOR");
                         modConn.setForeground(Color.RED);
                         panelenable(false);
-                        Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
-                    } catch (InterruptedException ex) {
                         Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
@@ -3850,27 +3865,31 @@ public class MainFrame extends javax.swing.JFrame {
             new Thread() {
                 @Override
                 public void run() {
-                    int offset = 0, readcnt, expectedLength = 0;
                     try {
                         while (true) {
-                            while (true) {
-
-                                readcnt = inputS.read(bufS);
-
-                                offset += readcnt;
-                                if (offset >= 10) {//
-                                    senseAck.setFromArray(bufS);
-                                    if (senseAck.header1.getValueAsString().equals("&&&&") && bufS[4] == Status.SENSESTAT) {
-                                        expectedLength = 48;
-                                        if (offset >= expectedLength) {
-                                            offset -= expectedLength;
-                                            break;
-                                        }
-                                    }
+                            while (true) {//pattern match for '&&&&'
+                                byte byte0 = inputS.readByte();
+                                if (byte0 != '&') {
+                                    continue;
                                 }
-
+                                byte byte1 = inputS.readByte();
+                                if (byte1 != '&') {
+                                    continue;
+                                }
+                                byte byte2 = inputS.readByte();
+                                if (byte2 != '&') {
+                                    continue;
+                                }
+                                byte byte3 = inputS.readByte();
+                                if (byte3 == '&') {
+                                    break;
+                                }
                             }
-                            setSensorMonitoringStatus(bufS);
+                            byte byte4 = inputS.readByte();
+                            if (byte4 == Status.SENSESTAT) {
+                                inputS.readFully(bufS, 5, 43);
+                                setSensorMonitoringStatus(bufS);
+                            }
                         }
 
                     } catch (IOException ex) {

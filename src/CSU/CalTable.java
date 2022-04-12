@@ -81,7 +81,7 @@ public class CalTable extends javax.swing.JPanel {
 
                             String[] mVs = xmlReadWrite.getAllTextValuesByTag("voltage");
                             String[] powers = xmlReadWrite.getAllTextValuesByTag("power");
-                            DefaultTableModel dm = new DefaultTableModel(new Object[][]{}, new String[]{"Sr no", "mV", "dBm"});
+                            DefaultTableModel dm = new DefaultTableModel(new Object[][]{}, new String[]{"Sr no", "ADC value", "dBm"});
                             for (int j = 0; j < tablelen[i]; j++) {
                                 dm.addRow(new Object[]{String.valueOf(j + 1), mVs[j], powers[j]});
                             }
@@ -110,7 +110,7 @@ public class CalTable extends javax.swing.JPanel {
 //
             JScrollPane jScrollPane1 = new javax.swing.JScrollPane();
             jTable1 = new javax.swing.JTable();
-            DefaultTableModel dm = new DefaultTableModel(new Object[][]{}, new String[]{"Sr no", "mV", "dBm"});
+            DefaultTableModel dm = new DefaultTableModel(new Object[][]{}, new String[]{"Sr no", "ADC value", "dBm"});
 //            for(int i=0;i<45;i++){
 //                dm.addRow(new Object[]{});
 //            }

@@ -178,4 +178,5 @@ public class Intfield extends Field {
         int val = getValue();
         return (val < min || val > max) ? Status.ERROR : Status.FINE;
     }
+    
 }

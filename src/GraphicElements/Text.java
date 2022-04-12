@@ -60,7 +60,7 @@ public class Text {
         yfactor = yf;
         currLoc.x = (int) (xfactor * normloc.x);
         currLoc.y = (int) (yfactor * normloc.y);
-        spBtnLn = 1.6*fontsize;
+        spBtnLn = 1.2*fontsize;
     }
 
     public void draw(Graphics2D g) {
