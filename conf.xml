@@ -2,7 +2,8 @@
 <root>
 	<CathodeVoltage>-15</CathodeVoltage>
 	<GridVoltage>-50</GridVoltage>
-	<FilamentVoltage>-6</FilamentVoltage>
+	<FilamentVoltage>-6.1</FilamentVoltage>
+	<CollectorVoltage>0.1</CollectorVoltage>
 	<IPAddressM>127.0.0.1</IPAddressM>
 	<portnoM>20000</portnoM>
 	<IPAddressS>127.0.0.1</IPAddressS>

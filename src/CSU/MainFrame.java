@@ -131,6 +131,7 @@ public class MainFrame extends javax.swing.JFrame {
 //    private final Timer wdgTimer;
     private byte[] bufM = new byte[49];
     private byte[] bufS = new byte[200];
+    byte[] packetM;
     private volatile boolean autoONinprogress;
     private volatile boolean autoOFFinprogress;
     private boolean[] onclicked;
@@ -166,7 +167,7 @@ public class MainFrame extends javax.swing.JFrame {
     private final int MAINS = 0, HV = 1, MOD = 2, RF = 3;
     private int FVfaultCount = 0, CVfaultCount = 0, BVfaultCount = 0;
     private final IntStat intStat2;
-    private int[] map1 = new int[]{6, 7, 9, 8, 12, 11, 4};
+    private int[] map1 = new int[]{7, 8, 10, 9, 13, 12, 4};
     private int[] map2 = new int[]{10, 13, 12, 11, 7, 9, 8, 6, 5};
     private final IntByp intByp2;
     private final IntByp intByp3;
@@ -174,7 +175,9 @@ public class MainFrame extends javax.swing.JFrame {
     private boolean VSWRinterlockset = false;
     private boolean intSelected = false;
     private boolean extSelected = true;
-    private int[] modFieldMap = new int[]{31, 37, 33, 32, 36, 38};
+    private int[] modFieldMap = new int[]{32, 38, 34, 33, 37, 39};
+    private final JButton stopButton;
+    private boolean otg = true;
 
     /**
      * Creates new form NewJFrame
@@ -187,6 +190,15 @@ public class MainFrame extends javax.swing.JFrame {
         desc.rectangle.settextcolor(Color.WHITE);
         title = new PSpace(desc, 0.05, 0.25, 0.66, 0.25);
 
+        stopButton = new JButton("Emergency Stop");
+        stopButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                sendEmergencyStop();
+            }
+        });
+        stopButton.setBackground(Color.YELLOW);
+        PSpace emStop = new PSpace(stopButton, 0.25, 0.30, 0.25, 0.30);
         p1 = new JPanel();
         addp1comps();
         b1 = new Border(p1);
@@ -521,12 +533,15 @@ public class MainFrame extends javax.swing.JFrame {
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.gridheight = 1;
-        gridBagConstraints.gridwidth = 4;
+        gridBagConstraints.gridwidth = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weightx = 1;
+        gridBagConstraints.weightx = 0.7;
         gridBagConstraints.weighty = 0.15;
         getContentPane().add(title, gridBagConstraints);
-
+        gridBagConstraints.gridx = 3;
+        gridBagConstraints.weightx = 0.3;
+        gridBagConstraints.gridwidth = 1;
+        getContentPane().add(emStop, gridBagConstraints);
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 4;
         gridBagConstraints.gridheight = 1;
@@ -553,7 +568,7 @@ public class MainFrame extends javax.swing.JFrame {
         } catch (IOException ex) {
             Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
         }
-        modstatReqTimer = new Timer(100, new ActionListener() {
+        modstatReqTimer = new Timer(1000, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 statreqActionPerformed(null);
@@ -565,7 +580,7 @@ public class MainFrame extends javax.swing.JFrame {
                 sendStatReq2SenseActionPerformed(null);
             }
         });
-        intResetTimer = new Timer(1000, new ActionListener() {
+        intResetTimer = new Timer(3000, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 sendReset(Status.OFF);
@@ -586,14 +601,15 @@ public class MainFrame extends javax.swing.JFrame {
         digitalInputstat = frame;
         senseStatus = new MTSGStatusFormat();
         ModCtrlFrame modCtrlFrame = new ModCtrlFrame();
+        packetM = modCtrlFrame.getPacket();
         analogctrlframe = modCtrlFrame;
         digitalctrlframe = modCtrlFrame;
         digitalctrlframe.setInt();//to match the initial default selection
-        digitalctrlframe.setRemote();
+//        digitalctrlframe.setRemote();
         senseFrame = new SenseElectronicsFormat();
         senseFrame.loadFromFile("senseElParams.xml");
         VSWRLIMIT = senseFrame.VSWRhigh.getValueWithDecimal();
-        
+
         for (int i = 0; i < 6; i++) {
             analogMonitoring.setLabel(0, i, analogstat.fields.get(modFieldMap[i]).getName());
         }
@@ -1450,6 +1466,13 @@ public class MainFrame extends javax.swing.JFrame {
 //            displayFrame.sdisp[i].setText("");
 //        }
         sendtoModulator(packet);
+        try {
+            Thread.sleep(250);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        sendtoModulator(packetM);
+
 
     }//GEN-LAST:event_statreqActionPerformed
 
@@ -1664,7 +1687,6 @@ public class MainFrame extends javax.swing.JFrame {
             p1btns[2].label.setColor(Color.BLACK);
             p1btns[3].setBackground(Color.RED);
             p1btns[3].label.setColor(Color.WHITE);
-            
 
             ActionListener intextListener = new ActionListener() {
                 @Override
@@ -1681,8 +1703,11 @@ public class MainFrame extends javax.swing.JFrame {
                         analogctrlframe.cathodeVoltage.setValueWithDecimal(CV);
                         analogctrlframe.filamentVoltage.setValueWithDecimal(FV);
                         analogctrlframe.warmUpTimer.setValue(warmUPTime);
-                        byte[] packet = digitalctrlframe.getPacket();
-                        sendtoModulator(packet);
+                        packetM = digitalctrlframe.getPacket();
+                        for (int i = 0; i < 15; i++) {
+                            String text = getString(packetM, 2 * i) + " " + getString(packetM, 2 * i + 1);
+                            displayFrame.sdisp[i].setText(text);
+                        }
                     }
                 }
             };
@@ -1748,7 +1773,7 @@ public class MainFrame extends javax.swing.JFrame {
             BVtext.addKeyListener(enterListener2);
             BVtext.setEditable(false);
             PSpace sp2 = new PSpace(BVtext, 0, 0.1, 0, 0.1);
-            String text3= reader.getTextByTag("FilamentVoltage");
+            String text3 = reader.getTextByTag("FilamentVoltage");
             FVtext = new JTextField(text3);
             FVtext.addKeyListener(enterListener2);
             FVtext.setEditable(false);
@@ -1758,7 +1783,7 @@ public class MainFrame extends javax.swing.JFrame {
             FV = Double.parseDouble(text3);
             BV = Double.parseDouble(text2);
             CV = Double.parseDouble(text1);
-            
+
             PSpace sp4 = new PSpace(warmUPTimeText, 0, 0.1, 0, 0.1);
             GridBagConstraints gridBagConstraints = new java.awt.GridBagConstraints();
             gridBagConstraints.fill = GridBagConstraints.BOTH;
@@ -1985,27 +2010,26 @@ public class MainFrame extends javax.swing.JFrame {
                         double w3 = senseFrame.DRxwidth.getValueWithDecimal();
                         double t3 = senseFrame.DRxtrail;
                         double w2 = d3 + w3 + t3;
-                        analogctrlframe.pulsewidth.setValueWithDecimal(w2);
+                        analogctrlframe.pulsewidth.setValueWithDecimal(pw);
                         senseFrame.TRSWwidth.setValueWithDecimal(w2);
                         double bw = pw / senseFrame.baudNo.getValue();
                         senseFrame.baudWidth.setValueWithDecimal(bw);
                         pgroup.setVisible(false);
-                        byte[] packetM = analogctrlframe.getPacket();
+                        packetM = analogctrlframe.getPacket();
                         for (int i = 0; i < 15; i++) {
                             String text = getString(packetM, 2 * i) + " " + getString(packetM, 2 * i + 1);
                             displayFrame.sdisp[i].setText(text);
                         }
 
-                        for (int i = 0; i < 20; i++) {
-                            try {
-                                Thread.sleep(50);
-                            } catch (InterruptedException ex) {
-                                Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
-                            }
-                            System.out.println(analogctrlframe.warmUpTimer.getValueAsString());
-                            sendtoModulator(packetM);
-                        }
-
+//                        for (int i = 0; i < 20; i++) {
+//                            try {
+//                                Thread.sleep(50);
+//                            } catch (InterruptedException ex) {
+//                                Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+//                            }
+//
+//                            sendtoModulator(packetM);
+//                        }
                         byte[] packetS = senseFrame.getPacket();
                         senseFrame.printToFile("senseElParams.xml");
                         sendtoSenseElectronics(packetS);
@@ -3080,7 +3104,7 @@ public class MainFrame extends javax.swing.JFrame {
             return false;
         }
 
-        byte[] packetM = digitalctrlframe.getPacket();
+        packetM = digitalctrlframe.getPacket();
         for (int i = 0; i < 15; i++) {
             String text = getString(packetM, 2 * i) + " " + getString(packetM, 2 * i + 1);
             displayFrame.sdisp[i].setText(text);
@@ -3088,19 +3112,19 @@ public class MainFrame extends javax.swing.JFrame {
 //        for (int i = 7; i < 15; i++) {
 //            displayFrame.sdisp[i].setText("");
 //        }
-        boolean result = false;
-        for (int i = 0; i < 10; i++) {
-            try {
-                Thread.sleep(50);
-            } catch (InterruptedException ex) {
-                Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            result = sendtoModulator(packetM);
-        }
+//        boolean result = false;
+//        for (int i = 0; i < 10; i++) {
+//            try {
+//                Thread.sleep(50);
+//            } catch (InterruptedException ex) {
+//                Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+//            }
+//            result = sendtoModulator(packetM);
+//        }
         if (mainsOnPressed) {
             mainsONTimer.restart();
         }
-        return result;
+        return modulatorConnected;
     }
 
     private void setMonitoringStatus(byte[] buf) {
@@ -3208,12 +3232,15 @@ public class MainFrame extends javax.swing.JFrame {
 
         digitalInputstat.setArr(buf);
         int overallstat = digitalInputstat.getStatus();
+       
         if ((overallstat == Status.ERROR) && (digitalInputstat.getMainsStatus() == Status.ON)) {
-            interlockMsg.setFaultDetail(digitalInputstat.fields.get(13).getText());
-            interlockMsg.setAlert(true);
+            if (digitalInputstat.fields.get(14).getValue() != 0) {
+                interlockMsg.setFaultDetail(digitalInputstat.fields.get(14).getText());
+            }
+            interlockMsg.setAlert(true,InterlockMsg.Modulator);            
 
         } else {
-            interlockMsg.setAlert(false);
+            interlockMsg.setAlert(false,InterlockMsg.Modulator);
         }
 
         for (int i = 0; i < 7; i++) {
@@ -3234,6 +3261,7 @@ public class MainFrame extends javax.swing.JFrame {
                 p1btns[1].label.setColor(Color.WHITE);
                 intChk = false;
                 extChk = true;
+                digitalctrlframe.setInt();
             }
 
         } else {//ext selected
@@ -3244,14 +3272,15 @@ public class MainFrame extends javax.swing.JFrame {
                 p1btns[0].label.setColor(Color.WHITE);
                 intChk = true;
                 extChk = false;
+                digitalctrlframe.setExt();
             }
         }
-        
+
         int value = digitalInputstat.FAULT_STATUS.getValue();
-        if(value!=0){
+        if (value != 0) {
             digitalInputstat.FAULT_STATUS.getValue();
         }
-        System.out.println(value);
+//        System.out.println(value);
         int[] bits = getbits(buf[9]);
         for (int i = 0; i < 3; i++) {
             int val = digitalInputstat.fields.get(i + 1).getValue();
@@ -3349,8 +3378,7 @@ public class MainFrame extends javax.swing.JFrame {
 
         }
 
-        boolean flag2 = bits[2] == 0;
-
+        boolean flag2 = bits[3] == 0;
         for (int i = 0; i < prfbtns.length; i++) {
             prfbtns[i].setEnabled(chk1.isSelected() && flag2);
             pwbtns[i].setEnabled(chk1.isSelected() && flag2);
@@ -3389,8 +3417,29 @@ public class MainFrame extends javax.swing.JFrame {
             }
         } else {
             currentStage = -1;
+            if (digitalInputstat.emergencyStop.getValue() == 1) {
+                if (digitalInputstat.getMainsStatus() == Status.OFF) {
+                    digitalctrlframe.setStop(Status.OFF);
+                    stopButton.setBackground(Color.YELLOW);
+                }
+            }
         }
-
+        if (otg) {
+            if (currentStage >= MAINS) {
+                digitalctrlframe.setMains(Status.ON);
+                if (currentStage >= HV) {
+                    digitalctrlframe.setHV(Status.ON);
+                    if (currentStage == MOD) {
+                        digitalctrlframe.setModulator(Status.ON);
+                    }
+                }
+            }            
+            packetM = digitalctrlframe.getPacket();
+            otg = false;
+        }
+        
+        
+        
         //panel p2
 //                int[] bits = getbits(buf[9]);
 //                for (int i = 0; i < 3; i++) {
@@ -3489,6 +3538,7 @@ public class MainFrame extends javax.swing.JFrame {
 //            for (int i = expectedLength / 2 + 1; i < 15; i++) {
 //                displayFrame.rdisp[i].setText("");
 //            }
+
     }
 
     private void setSensorMonitoringStatus(byte[] buf) {
@@ -3549,9 +3599,8 @@ public class MainFrame extends javax.swing.JFrame {
         p3setstatus(1, senseStatus.ADIL.getStatus(), senseStatus.ADIL.getText());
         p3setstatus(2, senseStatus.BLIL.getStatus(), senseStatus.BLIL.getText());
         int value = senseStatus.pressure.getValue();
-
-        int wgpressure = senseStatus.press_il.getStatus();
-        String wgpressuretext = senseStatus.press_il.getText();
+        int wgpressure = senseStatus.pressureIL.getStatus();
+        String wgpressuretext = senseStatus.pressureIL.getText();
         intStat2.setStatus(4, wgpressure, String.valueOf(value));
         for (int i = 5; i < 9; i++) {
             int status = senseStatus.fields.get(map2[i]).getStatus();
@@ -3563,6 +3612,13 @@ public class MainFrame extends javax.swing.JFrame {
         p3setstatus(3, wgpressure, wgpressuretext);
         //p3setstatus(4, wgpressurelow, wgpressurelowtext);
         p3setstatus(4, senseStatus.CTIL.getStatus(), senseStatus.CTIL.getText());
+        if(senseStatus.getStatus()==Status.ERROR){
+            interlockMsg.setFaultDetail(null);
+            interlockMsg.setAlert(true,InterlockMsg.Sensor);
+        }else{
+            interlockMsg.setAlert(false,InterlockMsg.Sensor);
+        }
+        
     }
 
     private void panelenable(boolean flag) {
@@ -3606,11 +3662,11 @@ public class MainFrame extends javax.swing.JFrame {
             }
 
         } else {
-            result = true;
-//            result = (digitalInputstat.getHVStatus() == Status.OFF);
-//            if (result == false) {
-//                JOptionPane.showMessageDialog(ons[1], "Next stage should be OFF first");
-//            }
+
+            result = (digitalInputstat.getHVStatus() == Status.OFF);
+            if (result == false) {
+                JOptionPane.showMessageDialog(ons[1], "Next stage should be OFF first");
+            }
         }
         return result;
     }
@@ -3893,6 +3949,9 @@ public class MainFrame extends javax.swing.JFrame {
                         }
 
                     } catch (IOException ex) {
+                        senseElConnected = false;
+                        senseConn.setText("NOT CONNECTED TO MTSG");
+                        senseConn.setForeground(Color.RED);
                         Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
@@ -3929,7 +3988,7 @@ public class MainFrame extends javax.swing.JFrame {
         for (int i = 7; i < 15; i++) {
             displayFrame.sdisp[i].setText("");
         }
-        sendtoModulator(packetM);
+
     }
 
     private boolean sendtoModulator(byte[] packet) {
@@ -3983,5 +4042,14 @@ public class MainFrame extends javax.swing.JFrame {
                 ;
         }
         p3results[itemIndex].setText(text);
+    }
+
+    private void sendEmergencyStop() {
+        if (currentStage >= MAINS) {
+            digitalctrlframe.setStop(Status.ON);
+            stopButton.setBackground(Color.red);
+
+            packetM = digitalctrlframe.getPacket();
+        }
     }
 }

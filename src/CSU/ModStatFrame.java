@@ -28,6 +28,8 @@ public class ModStatFrame extends SH {
     public SH.field hv;
     public SH.field mod;
     public SH.field reset;
+    public SH.field emergencyStop;
+    
     public SH.field FAULT_STATUS;
     
     public SH.field MAINS_IN;
@@ -54,7 +56,7 @@ public class ModStatFrame extends SH {
     public SH.field beamOnVoltage;
     public SH.field beamOFFoltage;
     public SH.field collectorVoltage;
-    public SH.field helixBodyCurrent;
+    public SH.field collectorCurrent;
     public SH.field cathodeVoltage;
     public SH.field cathodeCurrent;
     public SH.field PRF;
@@ -72,37 +74,38 @@ public class ModStatFrame extends SH {
 
     public ModStatFrame() {
         super("StatDefs/ModStats.xml");
-        indx=new int[]{6,7,8,9,10,11,12};
-        ready = fields.get(5);
-        helixCurrent = fields.get(6);
-        cathodeCurrent = fields.get(7);
-        excessDuty = fields.get(8);
-        excessVSWR = fields.get(9);
-        extmodpulse = fields.get(10);
-        KOT = fields.get(11);
-        COT=fields.get(12);        
+        indx=new int[]{7,8,9,10,11,12,13};
+        ready = fields.get(6);
+        helixCurrent = fields.get(7);
+        cathodeCurrent = fields.get(8);
+        excessDuty = fields.get(9);
+        excessVSWR = fields.get(10);
+        extmodpulse = fields.get(22);
+        KOT = fields.get(12);
+        COT=fields.get(13);        
         BYPASS = fields.get(0);
         mains = fields.get(1);
         hv = fields.get(2);
         mod = fields.get(3);
         reset = fields.get(4);
-        FAULT_STATUS = fields.get(13);
+        emergencyStop=fields.get(5);
+        FAULT_STATUS = fields.get(14);
         
-        remote_local = fields.get(20);
+        remote_local = fields.get(21);
 //        modindication = fields.get(5);
 //        extintfault = fields.get(4);       
         
         
-        filamentVoltage = fields.get(31);
-        filamentCurrent = fields.get(32);              
-        beamOnVoltage = fields.get(33);
-        beamOFFoltage = fields.get(34);
-        collectorVoltage = fields.get(35);
-        helixBodyCurrent = fields.get(36);
-        cathodeVoltage = fields.get(37);
-        cathodeCurrent = fields.get(38);
-        PRF = fields.get(39);
-        PW = fields.get(40);
+        filamentVoltage = fields.get(32);
+        filamentCurrent = fields.get(33);              
+        beamOnVoltage = fields.get(34);
+        beamOFFoltage = fields.get(35);
+        collectorVoltage = fields.get(36);
+        collectorCurrent = fields.get(37);
+        cathodeVoltage = fields.get(38);
+        cathodeCurrent = fields.get(39);
+        PRF = fields.get(40);
+        PW = fields.get(41);
     }
     public int getMainsStatus() {
         

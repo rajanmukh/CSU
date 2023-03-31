@@ -30,6 +30,9 @@ public class InterlockMsg extends JPanel {
     private JLabel notification1, notification2;
     private int count;
     private String faultInfo;
+    public static final int Modulator=0,Sensor=1;
+    private boolean modulatorNotOk;
+    private boolean sensorNotOk;
 
     public InterlockMsg() {
         setPreferredSize(new Dimension(0, 0));
@@ -53,7 +56,7 @@ public class InterlockMsg extends JPanel {
         constraints.fill = GridBagConstraints.BOTH;
         constraints.weightx = 1;
         constraints.weighty = 0.33;
-        add(new PSpace(alert,0.1,0.1,0.1,0.1), constraints);
+        add(new PSpace(alert, 0.1, 0.1, 0.1, 0.1), constraints);
         constraints.gridx = 0;
         constraints.gridy = 1;
         add(notification1, constraints);
@@ -65,7 +68,7 @@ public class InterlockMsg extends JPanel {
             public void actionPerformed(ActionEvent e) {
                 if (show) {
                     alert.setBorder(BorderFactory.createLineBorder(Color.RED));
-                    alert.setText("Check Interlock: "+faultInfo);
+                    alert.setText("Check Interlock" + faultInfo);
                 } else {
                     alert.setBorder(null);
                     alert.setText("");
@@ -77,20 +80,26 @@ public class InterlockMsg extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 count++;
-                notification2.setText(count + " s");                
+                notification2.setText(count + " s");
             }
         });
     }
 
-    public void setAlert(boolean flag) {
+    public void setAlert(boolean flag, int subsys) {
+        if(subsys==Modulator){
+            modulatorNotOk = flag;
+        }
+        if(subsys==Sensor){
+            sensorNotOk = flag;
+        }       
 
-        if (flag) {
+        if (modulatorNotOk || sensorNotOk) {
             if (!blinkTimer.isRunning()) {
                 show = true;
-                blinkTimer.start();
+                blinkTimer.start();                
             }
-        } else {
-            if (blinkTimer.isRunning()) {                
+        } else {            
+            if (blinkTimer.isRunning()) {
                 blinkTimer.stop();
                 alert.setBorder(null);
                 alert.setText("");
@@ -103,7 +112,7 @@ public class InterlockMsg extends JPanel {
             if (!delaytick.isRunning()) {
                 count = 0;
                 notification1.setText("HV NOT READY");
-                notification2.setText(count + " s");     
+                notification2.setText(count + " s");
                 delaytick.start();
             }
         } else {
@@ -116,6 +125,10 @@ public class InterlockMsg extends JPanel {
     }
 
     void setFaultDetail(String text) {
-        faultInfo=text;
+        if (text != null) {
+            faultInfo = ": " + text;
+        } else {
+            faultInfo="";
+        }
     }
 }

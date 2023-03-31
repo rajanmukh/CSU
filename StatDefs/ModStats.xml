@@ -36,7 +36,12 @@ and open the template in the editor.
 		<text x="0">OFF</text>
     </field>
 	<field>
-		<size>2</size>
+		<name>EMERGENCY_STOP</name>
+        	<text x="1">ON</text>
+		<text x="0">OFF</text>
+    </field>
+	<field>
+		<size>1</size>
         	<type>spare</type>
     </field>
 	<field>
