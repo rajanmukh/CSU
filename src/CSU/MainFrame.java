@@ -3883,6 +3883,7 @@ public class MainFrame extends javax.swing.JFrame {
                             if (code == 3) {//status packet
                                 inputM.readFully(bufM, 9, 40);
                                 setMonitoringStatus(bufM);
+                                
                             } else if (code == 16) {//control packet acknowledgement
                                 inputM.readFully(bufM, 9, 4);
                             }

@@ -133,19 +133,21 @@ public class ModStatFrame extends SH {
                 return result;
             }
         }
-        for(int i=31;i<38;i++){
+        for(int i=7;i<8;i++){
             double factor=((double)fields.get(i).getValue())/currdframe.fields.get(i).getValue();
             result=(factor<lowthreshold)||(factor>upthreshold);
             if(result==true){
                 return result;
             }
         }
-        for(int i=39;i<40;i++){
-            result=fields.get(i).getValue()!=currdframe.fields.get(i).getValue();
+        for(int i=32;i<42;i++){
+            double factor=((double)fields.get(i).getValue())/currdframe.fields.get(i).getValue();
+            result=(factor<lowthreshold)||(factor>upthreshold);
             if(result==true){
                 return result;
             }
         }
+        
         return result;
     }
 

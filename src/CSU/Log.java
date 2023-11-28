@@ -30,6 +30,7 @@ public class Log {
     private static RandomAccessFile writeFile2;
     private static int pos1;
     private static int pos2;
+   
     
 
     public static void Initialize() throws IOException {
